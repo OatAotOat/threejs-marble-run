@@ -4,6 +4,7 @@ import { useKeyboardControls } from '@react-three/drei'
 import { useState, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import useGame from './stores/useGame.jsx'
+import usePlayer from './stores/usePlayer.jsx'
 
 export default function Player()
 {
@@ -16,6 +17,12 @@ export default function Player()
     const end = useGame((state) => state.end)
     const restart = useGame((state) => state.restart)
     const blocksCount = useGame((state) => state.blocksCount)
+
+    const playerForward = usePlayer((state) => state.playerForward)
+    const playerBackward = usePlayer((state) => state.playerBackward)
+    const playerLeftward = usePlayer((state) => state.playerLeftward)
+    const playerRightward = usePlayer((state) => state.playerRightward)
+    const playerJump = usePlayer((state) => state.playerJump)
 
     const [ jumpSound ] = useState(() => new Audio('./action_jump.mp3'))
 
@@ -66,6 +73,15 @@ export default function Player()
             }
         )
 
+        const unsubscribePlayerJump = usePlayer.subscribe(
+            (state) => state.playerJump,
+            (value) =>
+            {
+                if(value)
+                    jump()
+            }
+        )
+
         const unsubscribeAny = subscribeKeys(
             () =>
             {
@@ -77,6 +93,7 @@ export default function Player()
         {
             unsubscribeReset()
             unsubscribeJump()
+            unsubscribePlayerJump()
             unsubscribeAny()
         }
     }, [])
@@ -84,9 +101,17 @@ export default function Player()
     useFrame((state, delta) =>
     {
         /**
-         * Controls
+         * Controls - Combine keyboard and button inputs
          */
-        const { forward, backward, leftward, rightward } = getKeys()
+        const keyboardControls = getKeys()
+        
+        const forward = keyboardControls.forward || playerForward
+        const backward = keyboardControls.backward || playerBackward
+        const leftward = keyboardControls.leftward || playerLeftward
+        const rightward = keyboardControls.rightward || playerRightward
+
+        if(playerForward || playerBackward || playerLeftward || playerRightward || playerJump)
+            start()
 
         const impulse = { x: 0, y: 0, z: 0 }
         const torque = { x: 0, y: 0, z: 0 }

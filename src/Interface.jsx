@@ -1,5 +1,6 @@
 import { useKeyboardControls } from '@react-three/drei'
 import useGame from './stores/useGame.jsx'
+import usePlayer from './stores/usePlayer.jsx'
 import { useEffect, useRef } from 'react'
 import { addEffect } from '@react-three/fiber'
 
@@ -15,6 +16,18 @@ export default function Interface()
     const leftward = useKeyboardControls((state) => state.leftward)
     const rightward = useKeyboardControls((state) => state.rightward)
     const jump = useKeyboardControls((state) => state.jump)
+
+    const setPlayerForward = usePlayer((state) => state.setPlayerForward)
+    const setPlayerBackward = usePlayer((state) => state.setPlayerBackward)
+    const setPlayerLeftward = usePlayer((state) => state.setPlayerLeftward)
+    const setPlayerRightward = usePlayer((state) => state.setPlayerRightward)
+    const setPlayerJump = usePlayer((state) => state.setPlayerJump)
+
+    const playerForward = usePlayer((state) => state.playerForward)
+    const playerBackward = usePlayer((state) => state.playerBackward)
+    const playerLeftward = usePlayer((state) => state.playerLeftward)
+    const playerRightward = usePlayer((state) => state.playerRightward)
+    const playerJump = usePlayer((state) => state.playerJump)
 
     useEffect(() =>
     {
@@ -49,6 +62,46 @@ export default function Interface()
         }
     }, [])
 
+    const handleButtonPress = (direction) => {
+        switch (direction) {
+            case 'forward':
+                setPlayerForward(true)
+                break
+            case 'backward':
+                setPlayerBackward(true)
+                break
+            case 'leftward':
+                setPlayerLeftward(true)
+                break
+            case 'rightward':
+                setPlayerRightward(true)
+                break
+            case 'jump':
+                setPlayerJump(true)
+                break
+        }
+    }
+
+    const handleButtonRelease = (direction) => {
+        switch (direction) {
+            case 'forward':
+                setPlayerForward(false)
+                break
+            case 'backward':
+                setPlayerBackward(false)
+                break
+            case 'leftward':
+                setPlayerLeftward(false)
+                break
+            case 'rightward':
+                setPlayerRightward(false)
+                break
+            case 'jump':
+                setPlayerJump(false)
+                break
+        }
+    }
+
     return (
         <div className="interface">
 
@@ -61,15 +114,50 @@ export default function Interface()
             {/* Controls */}
             <div className="controls">
                 <div className="raw">
-                    <div className={ `key ${ forward ? 'active' : '' }` }/>
+                    <div 
+                        className={ `key ${ forward || playerForward ? 'active' : '' }` }
+                        onMouseDown={() => handleButtonPress('forward')}
+                        onMouseUp={() => handleButtonRelease('forward')}
+                        onMouseLeave={() => handleButtonRelease('forward')}
+                        onTouchStart={(e) => { e.preventDefault(); handleButtonPress('forward'); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handleButtonRelease('forward'); }}
+                    />
                 </div>
                 <div className="raw">
-                    <div className={ `key ${ leftward ? 'active' : '' }` }/>
-                    <div className={ `key ${ backward ? 'active' : '' }` }/>
-                    <div className={ `key ${ rightward ? 'active' : '' }` }/>
+                    <div 
+                        className={ `key ${ leftward || playerLeftward ? 'active' : '' }` }
+                        onMouseDown={() => handleButtonPress('leftward')}
+                        onMouseUp={() => handleButtonRelease('leftward')}
+                        onMouseLeave={() => handleButtonRelease('leftward')}
+                        onTouchStart={(e) => { e.preventDefault(); handleButtonPress('leftward'); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handleButtonRelease('leftward'); }}
+                    />
+                    <div 
+                        className={ `key ${ backward || playerBackward ? 'active' : '' }` }
+                        onMouseDown={() => handleButtonPress('backward')}
+                        onMouseUp={() => handleButtonRelease('backward')}
+                        onMouseLeave={() => handleButtonRelease('backward')}
+                        onTouchStart={(e) => { e.preventDefault(); handleButtonPress('backward'); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handleButtonRelease('backward'); }}
+                    />
+                    <div 
+                        className={ `key ${ rightward || playerRightward ? 'active' : '' }` }
+                        onMouseDown={() => handleButtonPress('rightward')}
+                        onMouseUp={() => handleButtonRelease('rightward')}
+                        onMouseLeave={() => handleButtonRelease('rightward')}
+                        onTouchStart={(e) => { e.preventDefault(); handleButtonPress('rightward'); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handleButtonRelease('rightward'); }}
+                    />
                 </div>
                 <div className="raw">
-                    <div className={ `key large ${ jump ? 'active' : '' }` }/>
+                    <div 
+                        className={ `key large ${ jump || playerJump ? 'active' : '' }` }
+                        onMouseDown={() => handleButtonPress('jump')}
+                        onMouseUp={() => handleButtonRelease('jump')}
+                        onMouseLeave={() => handleButtonRelease('jump')}
+                        onTouchStart={(e) => { e.preventDefault(); handleButtonPress('jump'); }}
+                        onTouchEnd={(e) => { e.preventDefault(); handleButtonRelease('jump'); }}
+                    />
                 </div>
             </div>
             
