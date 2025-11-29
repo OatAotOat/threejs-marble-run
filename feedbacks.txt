@@ -1,0 +1,21 @@
+For Future Development :
+DONE - Make It Responsive
+     - More Realistic Marble (With The Optimal Rendering)
+     - More Textures On Map
+     - Marble Squeeze Animation (Physics)
+     - Pause & Resume System?
+     - Music Theme?
+
+Nate's Challenge :
+    - Horror Parkour Game Theme
+    - Wind Mechanics
+    - Speed Pads
+    - Ice/Slippery Floors
+    - Water
+    - Electric Wires
+    - Lasers
+    - Coins & Store System
+    - Gyroscope
+    - Seesaws (Physics)
+    - Jump Pads
+    - Spikes (Sharp Things, Hitting It Makes You Smaller)

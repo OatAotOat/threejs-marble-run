@@ -57,12 +57,22 @@ body,
     left: 35%;
     width: 30%;
     color: #ffffff;
-    font-size: 80px;
+    font-size: 10vh;
     background: #00000033;
     padding-top: 10px;
     pointer-events: auto;
     cursor: pointer;
 }
+
+@media screen and (max-width: 768px) {
+    .time {
+        font-size: 4vh;
+    }
+    .restart {
+        font-size: 6vh;
+    }
+}
+
 
 /**
  * Controls

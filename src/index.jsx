@@ -5,6 +5,16 @@ import Experience from './Experience.jsx'
 import { KeyboardControls } from '@react-three/drei'
 import Interface from './Interface.jsx'
 
+const isMobileDevice = () => {
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0)
+    const isSmallScreen = window.innerWidth <= 768
+    
+    return isMobile || isTouchDevice || isSmallScreen;
+}
+
+const initialFov = isMobileDevice() ? 90 : 45
+
 const root = ReactDOM.createRoot(document.querySelector('#root'))
 
 root.render(
@@ -20,7 +30,7 @@ root.render(
         <Canvas
             shadows
             camera={ {
-                fov: 45,
+                fov: initialFov,
                 near: 0.1,
                 far: 200,
                 position: [ 2.5, 4, 6 ]
