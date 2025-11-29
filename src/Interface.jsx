@@ -106,7 +106,7 @@ export default function Interface()
         <div className="interface">
 
             {/* Time */}
-            <div ref={ time } className="time">00:00:000</div>
+            <div ref={ time } className="time">00 : 00 : 000</div>
 
             {/* Restart */}
             { phase === 'ended' && <div className="restart" onClick={ restart }>Restart</div> }

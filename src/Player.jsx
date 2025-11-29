@@ -187,13 +187,18 @@ export default function Player()
         position={ [ 0, 1, 0 ] }
     >
         <mesh castShadow receiveShadow>
-            <sphereGeometry args={ [ 0.3, 32, 16 ] } />
+            <sphereGeometry args={ [ 0.3, 48, 48 ] } />
             <meshPhysicalMaterial 
-                color="Magenta" 
-                roughness={ 0 } 
+                color="magenta"
+                roughness={ 0.1 } 
                 metalness={ 0 } 
                 transmission={ 1 }
                 ior={ 2.33 }
+                thickness={ 0.15 }
+                iridescence={ 1 }
+                iridescenceIOR={ 2.33 }
+                reflectivity={ 1 }
+                dispersion={ 1 }
             />
         </mesh>
     </RigidBody>
