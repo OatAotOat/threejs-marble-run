@@ -13,7 +13,7 @@ const isMobileDevice = () => {
     return isMobile || isTouchDevice || isSmallScreen;
 }
 
-const initialFov = isMobileDevice() ? 90 : 45
+const initialFov = isMobileDevice() ? 100 : 45
 
 const root = ReactDOM.createRoot(document.querySelector('#root'))
 

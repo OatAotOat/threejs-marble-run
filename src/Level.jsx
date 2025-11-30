@@ -42,6 +42,17 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
     trophy.scene.children.forEach((mesh) =>
     {
         mesh.castShadow = true
+    });
+
+    const trophyRef = useRef();
+
+    useFrame((state) =>
+    {
+        const time = state.clock.getElapsedTime()
+
+        const rotation = new THREE.Quaternion()
+        rotation.setFromEuler(new THREE.Euler(0, time * -level * 0.01, 0))
+        trophyRef.current.setNextKinematicRotation(rotation)
     })
 
     return <group position={ position }>
@@ -57,7 +68,7 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
             <mesh geometry={ boxGeometry } material={ floor1Material } position={ [ 0, -0.1, 0 ] } scale={ [ 4, 0.2, 4 ] } />
         </RigidBody>
         <mesh geometry={ boxGeometry } material={ floor1Material } position={ [ 0, 0, 0 ] } scale={ [ 4, 0.2, 4 ] } receiveShadow />
-        <RigidBody type="fixed" colliders="hull" position={ [ 0, 0.25, 0 ] } restitution={ 0.2 } friction={ 0 }>
+        <RigidBody ref={ trophyRef } type="kinematicPosition" colliders="hull" position={ [ 0, 0.25, 0 ] } restitution={ 0.2 } friction={ 0 }>
             <primitive object={ trophy.scene } scale={ 0.099 + level / 100 } />
         </RigidBody>
     </group>

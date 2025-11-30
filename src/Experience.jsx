@@ -12,7 +12,7 @@ export default function Experience()
     const blocksSeed = useGame(state => state.blocksSeed)
     const level = useGame(state => state.level)
     
-    const { camera } = useThree()
+    const { camera } = useThree();
 
     useEffect(() => {
         const checkIfMobile = () => {
@@ -24,7 +24,7 @@ export default function Experience()
         }
 
         const updateCameraFov = () => {
-            const newFov = checkIfMobile() ? 90 : 45
+            const newFov = checkIfMobile() ? 100 : 45
             camera.fov = newFov
             camera.updateProjectionMatrix()
         }

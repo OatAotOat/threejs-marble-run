@@ -198,7 +198,7 @@ export default function Player()
                 iridescence={ 1 }
                 iridescenceIOR={ 2.33 }
                 reflectivity={ 1 }
-                dispersion={ 1 }
+                dispersion={ 0.75 }
             />
         </mesh>
     </RigidBody>
