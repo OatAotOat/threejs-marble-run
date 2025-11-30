@@ -19,3 +19,6 @@ Nate's Challenge :
     - Seesaws (Physics)
     - Jump Pads
     - Spikes (Sharp Things, Hitting It Makes You Smaller)
+
+Mind's Challenge :
+    - Better User Controller In Mobile (Joystick Controller?)
