@@ -368,6 +368,7 @@ function Bounds({ length = 1 })
                 scale={ [ 4, 2, 0.3 ] }
                 receiveShadow
             />
+            {/* Invisible Walls */}
             <mesh
                 position={ [ 2.15, 3.5, - (length * 2) + 2 ] }
                 geometry={ boxGeometry }

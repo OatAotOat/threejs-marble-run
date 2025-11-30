@@ -13,7 +13,11 @@ const isMobileDevice = () => {
     return isMobile || isTouchDevice || isSmallScreen;
 }
 
-const initialFov = isMobileDevice() ? 100 : 45
+const isMediumScreen = () => {
+    return window.innerWidth > 768 && window.innerWidth <= 1024;
+}
+
+const initialFov = isMobileDevice() ? 100 : isMediumScreen() ? 75 : 45;
 
 const root = ReactDOM.createRoot(document.querySelector('#root'))
 
