@@ -24,7 +24,7 @@ export default function Player()
     const playerRightward = usePlayer((state) => state.playerRightward)
     const playerJump = usePlayer((state) => state.playerJump)
 
-    const [ jumpSound ] = useState(() => new Audio('./action_jump.mp3'))
+    const [ jumpSound ] = useState(() => new Audio(new Audio(`${import.meta.env.BASE_URL}/action_jump.mp3`)))
 
     const jump = () =>
     {

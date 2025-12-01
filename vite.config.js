@@ -1,5 +1,5 @@
 import react from '@vitejs/plugin-react'
-import { transformWithEsbuild } from 'vite'
+import { transformWithEsbuild, defineConfig } from 'vite'
 import restart from 'vite-plugin-restart'
 
 export default {
@@ -35,9 +35,9 @@ export default {
     },
     build:
     {
-        outDir: '../dist', // Output in the dist/ folder
+        outDir: '../build', // Output in the build/ folder
         emptyOutDir: true, // Empty the folder first
         sourcemap: true // Add sourcemap
     },
-    base: "/threejs-marble-run" // Set base path for gh-pages deployment
+    base: '/threejs-marble-run', // Set base for gh-pages
 }

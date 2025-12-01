@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d build"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "4.3",
@@ -20,6 +20,7 @@
     "@react-three/fiber": "^9.1.0",
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/rapier": "^2.0.0",
+    "gh-pages": "^6.3.0",
     "r3f-perf": "^7.2.3",
     "react": "19.0",
     "react-dom": "19.0",

@@ -4,6 +4,8 @@ import { useMemo, useState, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float, Text, useGLTF, Sparkles } from '@react-three/drei'
 
+const fontURL = `${import.meta.env.BASE_URL}/bebas-neue-v9-latin-regular.woff`
+
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
 const floor1Material = new THREE.MeshStandardMaterial({ color: 'limegreen' })
@@ -28,7 +30,7 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
 
         <Float floatIntensity={ 0.25 } rotationIntensity={ 0.25 }>
             <Text
-                font="/bebas-neue-v9-latin-regular.woff"
+                font={ fontURL }
                 scale={ 0.5 }
                 maxWidth={ 0.25 }
                 lineHeight={ 0.75 }
@@ -48,7 +50,7 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
 
 export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
 {
-    const trophy = useGLTF('/trophy.glb')
+    const trophy = useGLTF(`${import.meta.env.BASE_URL}/trophy.glb`)
 
     trophy.scene.children.forEach((mesh) =>
     {
@@ -79,7 +81,7 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
         />
 
         <Text
-            font="/bebas-neue-v9-latin-regular.woff"
+            font={ fontURL }
             scale={ 1 }
             position={ [ 0, 2.25, 2 ] }
         >
