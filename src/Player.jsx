@@ -17,6 +17,7 @@ export default function Player()
     const end = useGame((state) => state.end)
     const restart = useGame((state) => state.restart)
     const blocksCount = useGame((state) => state.blocksCount)
+    const phase = useGame((state) => state.phase)
 
     const playerForward = usePlayer((state) => state.playerForward)
     const playerBackward = usePlayer((state) => state.playerBackward)
@@ -172,7 +173,7 @@ export default function Player()
         if(bodyPosition.z < - (blocksCount * 4 + 2) && bodyPosition.y > 0)
             end()
 
-        if(bodyPosition.y < - 4)
+        if(bodyPosition.y < - 4 && phase !== 'ready')
             restart()
     })
 

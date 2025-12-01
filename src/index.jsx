@@ -19,6 +19,20 @@ const isMediumScreen = () => {
 
 const initialFov = isMobileDevice() ? 100 : isMediumScreen() ? 75 : 45;
 
+const preventDrag = (e) => {
+    e.preventDefault()
+}
+
+const preventScroll = (e) => {
+    e.preventDefault()
+}
+
+document.addEventListener('touchmove', preventScroll, { passive: false })
+document.addEventListener('gesturestart', preventDrag, { passive: false })
+document.addEventListener('gesturechange', preventDrag, { passive: false })
+document.addEventListener('gestureend', preventDrag, { passive: false })
+document.addEventListener('contextmenu', preventDrag)
+
 const root = ReactDOM.createRoot(document.querySelector('#root'))
 
 root.render(
