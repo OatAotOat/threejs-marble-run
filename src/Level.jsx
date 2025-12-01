@@ -439,8 +439,7 @@ function Bounds({ length = 1 })
 
 export function Level({
     count = 5,
-    types = [ BlockAxe ],
-    // types = [ BlockSpinner, BlockSpinner2, BlockAxe, BlockLimbo, BlockStrip, BlockPlatform, BlockPlatform2, BlockPlatform3, BlockStairs1, BlockStairs2 ],
+    types = [ BlockSpinner, BlockSpinner2, BlockAxe, BlockLimbo, BlockStrip, BlockPlatform, BlockPlatform2, BlockPlatform3, BlockStairs1, BlockStairs2 ],
     seed = 0,
     level = 1
 })
