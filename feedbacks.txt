@@ -6,6 +6,19 @@ DONE - Make It Responsive
      - Marble Squeeze Animation (Physics)
      - Pause & Resume System?
      - Music Theme?
+     
+Bruno's Challenge :
+DONE • Make the axe obstacle look like an actual balancing axe 
+DONE • More traps variations
+     • Control over the trap size
+     • Better scenery
+     • A boost key (Skip Key)
+     • Boost bonuses that are spread across the level
+     • Different difficulties
+DONE • Sounds
+DONE • Particles
+Done • Marble customisation
+     • Lasers that kill you instantly
 
 Nate's Challenge :
     - Horror Parkour Game Theme
@@ -14,7 +27,6 @@ Nate's Challenge :
     - Ice/Slippery Floors
     - Water
     - Electric Wires
-    - Lasers
     - Coins & Store System
     - Gyroscope
     - Seesaws (Physics)

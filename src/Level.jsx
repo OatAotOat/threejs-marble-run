@@ -1,8 +1,8 @@
 import * as THREE from 'three'
-import { CuboidCollider, RigidBody } from '@react-three/rapier'
+import { RigidBody } from '@react-three/rapier'
 import { useMemo, useState, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Float, Text, useGLTF } from '@react-three/drei'
+import { Float, Text, useGLTF, Sparkles } from '@react-three/drei'
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -15,6 +15,17 @@ const invisibleWallMaterial = new THREE.MeshStandardMaterial({ color: 'black', o
 export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
 {
     return <group position={ position }>
+        <Sparkles
+            size={ 4 }
+            scale={ [ 4, 2, 4 ] }
+            position-y={ 1 }
+            speed={ 0.2 }
+            count={ 30 }
+            color='aqua'
+            noise={ 0.5 }
+            type='sphere'
+        />
+
         <Float floatIntensity={ 0.25 } rotationIntensity={ 0.25 }>
             <Text
                 font="/bebas-neue-v9-latin-regular.woff"
@@ -56,6 +67,17 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
     })
 
     return <group position={ position }>
+        <Sparkles
+            size={ 4 }
+            scale={ [ 4, 2, 4 ] }
+            position-y={ 1 }
+            speed={ 0.2 }
+            count={ 30 }
+            color='hotpink'
+            noise={ 0.5 }
+            type='sphere'
+        />
+
         <Text
             font="/bebas-neue-v9-latin-regular.woff"
             scale={ 1 }
@@ -150,6 +172,21 @@ export function BlockAxe({ position = [ 0, 0, 0 ] })
 {
     const obstacle = useRef()
     const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
+    const [ axe1On ] = useState(() => Math.random() > 0.5 ? true : false);
+    const [ axe2On ] = useState(() => Math.random() < 0.5 ? true : false);
+
+    const boxPosition = new THREE.Vector3(0, 0, 0);
+    const boxScale = new THREE.Vector3(1.375, 1.5, 0.3);
+
+    if (axe1On && axe2On) {
+        boxScale.set(1.25, 1.5, 0.3);
+    } else if (!axe2On) {
+        boxPosition.set(0.0625, 0, 0);
+    } else if (!axe1On) {
+        boxPosition.set(-0.0625, 0, 0);
+    } else {
+        boxScale.set(1.5, 1.5, 0.3);
+    }
 
     useFrame((state) =>
     {
@@ -164,7 +201,9 @@ export function BlockAxe({ position = [ 0, 0, 0 ] })
             <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, - 0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
         </RigidBody>
         <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 1.5, 1.5, 0.3 ] } castShadow receiveShadow />
+            { axe1On && <mesh geometry={ boxGeometry } material={ obstacleMaterial } position={ [ -0.625, 0, 0 ] } scale={ [ 0.15 * 1.414, 1.5, 0.15 * 1.414 ] } rotation={ [0, Math.PI / 4, 0] } castShadow receiveShadow /> }
+            <mesh geometry={ boxGeometry } material={ obstacleMaterial } position={ boxPosition } scale={ boxScale } castShadow receiveShadow />
+            { axe2On && <mesh geometry={ boxGeometry } material={ obstacleMaterial } position={ [ 0.625, 0, 0 ] } scale={ [ 0.15 * 1.414, 1.5, 0.15 * 1.414 ] } rotation={ [0, Math.PI / 4, 0] } castShadow receiveShadow /> }
         </RigidBody>
     </group>
 }
@@ -400,7 +439,8 @@ function Bounds({ length = 1 })
 
 export function Level({
     count = 5,
-    types = [ BlockSpinner, BlockSpinner2, BlockAxe, BlockLimbo, BlockStrip, BlockPlatform, BlockPlatform2, BlockPlatform3, BlockStairs1, BlockStairs2 ],
+    types = [ BlockAxe ],
+    // types = [ BlockSpinner, BlockSpinner2, BlockAxe, BlockLimbo, BlockStrip, BlockPlatform, BlockPlatform2, BlockPlatform3, BlockStairs1, BlockStairs2 ],
     seed = 0,
     level = 1
 })
