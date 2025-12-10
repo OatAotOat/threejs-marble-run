@@ -2,7 +2,8 @@ For Future Development :
 DONE - Make It Responsive
      - More Realistic Marble (With The Optimal Rendering)
      - More Textures On Map
-     - Overlay The Behind-Player Obstacles
+     - Overlay The Passed Obstacles
+     - Save Blocks State For Each Level
      - Marble Squeeze Animation (Physics)
      - Pause & Resume System?
      - Music Theme?

@@ -6,7 +6,7 @@ import Lights from './Lights.jsx'
 import { Level } from './Level.jsx'
 import Player from './Player.jsx'
 import { Perf } from 'r3f-perf'
-import { Vignette, Bloom, EffectComposer, ToneMapping } from '@react-three/postprocessing'
+import { Vignette, Bloom, EffectComposer, ToneMapping, DepthOfField } from '@react-three/postprocessing'
 import { BlendFunction, ToneMappingMode } from 'postprocessing'
 import { Environment } from '@react-three/drei'
 
@@ -64,6 +64,11 @@ export default function Experience()
                     intensity={ 1 }
                     luminanceThreshold={ 0.9 }
                 />
+                {/* <DepthOfField 
+                    focusDistance={ 3 } 
+                    focalLength={ 10 } 
+                    bokehScale={ 10 } 
+                /> */}
                 <ToneMapping 
                     mode={ ToneMappingMode.ACES_FILMIC }
                 />
