@@ -10,7 +10,7 @@ const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
 const floor1Material = new THREE.MeshStandardMaterial({ color: 'limegreen' })
 const floor2Material = new THREE.MeshStandardMaterial({ color: 'yellow' })
-const obstacleMaterial = new THREE.MeshStandardMaterial({ color: 'red', roughness: 1 })
+const obstacleMaterial = new THREE.MeshStandardMaterial({ color: 'red', roughness: 1, transparent: true, opacity: 0.75 })
 const wallMaterial = new THREE.MeshStandardMaterial({ color: 'grey' })
 const invisibleWallMaterial = new THREE.MeshStandardMaterial({ color: 'black', opacity: 0, transparent: true, castShadow: false, blendAlpha: 0 })
 
@@ -343,9 +343,7 @@ export function BlockStairs1({ position = [ 0, 0, 0 ] })
             <mesh position={[ 0, 0, -0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
         </RigidBody>
         <RigidBody type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0.5, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 1.5, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 2.5, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.75, 0.5 ] } castShadow receiveShadow />
+            <mesh position={[ 0, 1.5, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 2.75, 0.5 ] } castShadow receiveShadow />
         </RigidBody>
     </group>
 }
@@ -374,8 +372,7 @@ export function BlockStairs2({ position = [ 0, 0, 0 ] })
             <mesh position={[ 0, 2.25, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
         </RigidBody>
         <RigidBody type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0.5, 0 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 1.5, 0 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.75, 0.5 ] } castShadow receiveShadow />
+            <mesh position={[ 0, 0.75, 0 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 2, 0.5 ] } castShadow receiveShadow />
         </RigidBody>
         <RigidBody ref={ obstacle2 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
             <mesh position={[ 0, 0, 0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
