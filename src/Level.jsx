@@ -1,10 +1,10 @@
 import * as THREE from 'three'
-import { RigidBody } from '@react-three/rapier'
-import { useMemo, useState, useRef } from 'react'
+import { RigidBody, CuboidCollider } from '@react-three/rapier'
+import { useMemo, useState, useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float, Text, useGLTF, Sparkles } from '@react-three/drei'
 
-const fontURL = `${import.meta.env.BASE_URL}/bebas-neue-v9-latin-regular.woff`
+const fontURL = `${import.meta.env.BASE_URL}bebas-neue-v9-latin-regular.woff`
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -12,8 +12,61 @@ const floor1Material = new THREE.MeshStandardMaterial({ color: 'limegreen' })
 const floor2Material = new THREE.MeshStandardMaterial({ color: 'yellow' })
 const obstacleMaterial = new THREE.MeshStandardMaterial({ color: 'red', roughness: 1, transparent: true, opacity: 0.75 })
 const wallMaterial = new THREE.MeshStandardMaterial({ color: 'grey' })
-const invisibleWallMaterial = new THREE.MeshStandardMaterial({ color: 'black', opacity: 0, transparent: true, castShadow: false, blendAlpha: 0 })
 
+const kinematicEuler = new THREE.Euler()
+const kinematicRotation = new THREE.Quaternion()
+const kinematicTranslation = { x: 0, y: 0, z: 0 }
+
+const setNextRotation = (body, x, y, z) =>
+{
+    kinematicEuler.set(x, y, z)
+    kinematicRotation.setFromEuler(kinematicEuler)
+    body.setNextKinematicRotation(kinematicRotation)
+}
+
+const setNextTranslation = (body, x, y, z) =>
+{
+    kinematicTranslation.x = x
+    kinematicTranslation.y = y
+    kinematicTranslation.z = z
+    body.setNextKinematicTranslation(kinematicTranslation)
+}
+
+/**
+ * Block building pieces
+ */
+function useBlockAnimation(animate)
+{
+    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
+
+    useFrame((state) =>
+    {
+        animate(state.clock.getElapsedTime() + timeOffset)
+    })
+}
+
+function BlockFloor({ material = floor2Material, position = [ 0, -0.1, 0 ], scale = [ 4, 0.2, 4 ] })
+{
+    return <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
+        <mesh geometry={ boxGeometry } material={ material } position={ position } scale={ scale } receiveShadow />
+    </RigidBody>
+}
+
+function Obstacle({ ref, position = [ 0, 0.3, 0 ], children })
+{
+    return <RigidBody ref={ ref } type="kinematicPosition" position={ position } restitution={ 0.2 } friction={ 0 }>
+        { children }
+    </RigidBody>
+}
+
+function ObstacleBox(props)
+{
+    return <mesh geometry={ boxGeometry } material={ obstacleMaterial } castShadow receiveShadow { ...props } />
+}
+
+/**
+ * Blocks
+ */
 export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
 {
     return <group position={ position }>
@@ -42,20 +95,21 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
                 <meshBasicMaterial toneMapped={ false } />
             </Text>
         </Float>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor1Material } position={ [ 0, -0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
+        <BlockFloor material={ floor1Material } />
     </group>
 }
 
 export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
 {
-    const trophy = useGLTF(`${import.meta.env.BASE_URL}/trophy.glb`)
+    const trophy = useGLTF(`${import.meta.env.BASE_URL}trophy.glb`)
 
-    trophy.scene.children.forEach((mesh) =>
+    useEffect(() =>
     {
-        mesh.castShadow = true
-    });
+        trophy.scene.children.forEach((mesh) =>
+        {
+            mesh.castShadow = true
+        })
+    }, [ trophy ])
 
     const trophyRef = useRef();
 
@@ -63,9 +117,7 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
     {
         const time = state.clock.getElapsedTime()
 
-        const rotation = new THREE.Quaternion()
-        rotation.setFromEuler(new THREE.Euler(0, time * -level * 0.01, 0))
-        trophyRef.current.setNextKinematicRotation(rotation)
+        setNextRotation(trophyRef.current, 0, time * -level * 0.01, 0)
     })
 
     return <group position={ position }>
@@ -88,10 +140,7 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
             FINISH
             <meshBasicMaterial toneMapped={ false } />
         </Text>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor1Material } position={ [ 0, -0.1, 0 ] } scale={ [ 4, 0.2, 4 ] } />
-        </RigidBody>
-        <mesh geometry={ boxGeometry } material={ floor1Material } position={ [ 0, 0, 0 ] } scale={ [ 4, 0.2, 4 ] } receiveShadow />
+        <BlockFloor material={ floor1Material } />
         <RigidBody ref={ trophyRef } type="kinematicPosition" colliders="hull" position={ [ 0, 0.25, 0 ] } restitution={ 0.2 } friction={ 0 }>
             <primitive object={ trophy.scene } scale={ 0.099 + level / 100 } />
         </RigidBody>
@@ -103,22 +152,16 @@ export function BlockSpinner({ position = [ 0, 0, 0 ] })
     const obstacle = useRef()
     const [ speed ] = useState(() => (Math.random() + 0.2) * (Math.random() < 0.5 ? - 1 : 1))
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const rotation = new THREE.Quaternion()
-        rotation.setFromEuler(new THREE.Euler(0, time * speed, 0))
-        obstacle.current.setNextKinematicRotation(rotation)
+        setNextRotation(obstacle.current, 0, time * speed, 0)
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, - 0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.3, 0.3 ] } castShadow receiveShadow />
-        </RigidBody>
+        <BlockFloor />
+        <Obstacle ref={ obstacle }>
+            <ObstacleBox scale={ [ 3.5, 0.3, 0.3 ] } />
+        </Obstacle>
     </group>
 }
 
@@ -127,53 +170,41 @@ export function BlockSpinner2({ position = [ 0, 0, 0 ] })
     const obstacle = useRef()
     const [ speed ] = useState(() => (Math.random() + 0.2) * (Math.random() < 0.5 ? - 1 : 1))
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const rotation = new THREE.Quaternion()
-        rotation.setFromEuler(new THREE.Euler(0, 0, time * speed))
-        obstacle.current.setNextKinematicRotation(rotation)
+        setNextRotation(obstacle.current, 0, 0, time * speed)
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, - 0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.75, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 0.5, 3.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
+        <BlockFloor />
+        <Obstacle ref={ obstacle } position={ [ 0, 0.75, 0 ] }>
+            <ObstacleBox scale={ [ 3.5, 0.5, 0.5 ] } />
+            <ObstacleBox scale={ [ 0.5, 3.5, 0.5 ] } />
+        </Obstacle>
     </group>
 }
 
 export function BlockLimbo({ position = [ 0, 0, 0 ] })
 {
     const obstacle = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const y = Math.sin(time + timeOffset) + 1.15
-        obstacle.current.setNextKinematicTranslation({ x: position[0], y: position[1] + y, z: position[2] })
+        const y = Math.sin(time) + 1.15
+        setNextTranslation(obstacle.current, position[0], position[1] + y, position[2])
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, - 0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.3, 0.3 ] } castShadow receiveShadow />
-        </RigidBody>
+        <BlockFloor />
+        <Obstacle ref={ obstacle }>
+            <ObstacleBox scale={ [ 3.5, 0.3, 0.3 ] } />
+        </Obstacle>
     </group>
 }
 
 export function BlockAxe({ position = [ 0, 0, 0 ] })
 {
     const obstacle = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
     const [ axe1On ] = useState(() => Math.random() > 0.5 ? true : false);
     const [ axe2On ] = useState(() => Math.random() < 0.5 ? true : false);
 
@@ -190,23 +221,19 @@ export function BlockAxe({ position = [ 0, 0, 0 ] })
         boxScale.set(1.5, 1.5, 0.3);
     }
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const x = Math.sin(time + timeOffset) * 1.25
-        obstacle.current.setNextKinematicTranslation({ x: position[0] + x, y: position[1] + 0.75, z: position[2] })
+        const x = Math.sin(time) * 1.25
+        setNextTranslation(obstacle.current, position[0] + x, position[1] + 0.75, position[2])
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, - 0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            { axe1On && <mesh geometry={ boxGeometry } material={ obstacleMaterial } position={ [ -0.625, 0, 0 ] } scale={ [ 0.15 * 1.414, 1.5, 0.15 * 1.414 ] } rotation={ [0, Math.PI / 4, 0] } castShadow receiveShadow /> }
-            <mesh geometry={ boxGeometry } material={ obstacleMaterial } position={ boxPosition } scale={ boxScale } castShadow receiveShadow />
-            { axe2On && <mesh geometry={ boxGeometry } material={ obstacleMaterial } position={ [ 0.625, 0, 0 ] } scale={ [ 0.15 * 1.414, 1.5, 0.15 * 1.414 ] } rotation={ [0, Math.PI / 4, 0] } castShadow receiveShadow /> }
-        </RigidBody>
+        <BlockFloor />
+        <Obstacle ref={ obstacle }>
+            { axe1On && <ObstacleBox position={ [ -0.625, 0, 0 ] } scale={ [ 0.15 * 1.414, 1.5, 0.15 * 1.414 ] } rotation={ [0, Math.PI / 4, 0] } /> }
+            <ObstacleBox position={ boxPosition } scale={ boxScale } />
+            { axe2On && <ObstacleBox position={ [ 0.625, 0, 0 ] } scale={ [ 0.15 * 1.414, 1.5, 0.15 * 1.414 ] } rotation={ [0, Math.PI / 4, 0] } /> }
+        </Obstacle>
     </group>
 }
 
@@ -214,96 +241,82 @@ export function BlockStrip({ position = [ 0, 0, 0 ] })
 {
     const obstacle1 = useRef()
     const obstacle2 = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const y = Math.sin(time + timeOffset) + 1.15;
-        obstacle1.current.setNextKinematicTranslation({ x: position[0], y: position[1] + y, z: position[2] });
-        obstacle2.current.setNextKinematicTranslation({ x: position[0], y: position[1] - y, z: position[2] });
+        const y = Math.sin(time) + 1.15
+        setNextTranslation(obstacle1.current, position[0], position[1] + y, position[2])
+        setNextTranslation(obstacle2.current, position[0], position[1] - y, position[2])
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, -0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle1 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0, 1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 0, 0 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 0, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle2 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 2.5, 0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 2.5, -0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
+        <BlockFloor />
+        <Obstacle ref={ obstacle1 }>
+            <ObstacleBox position={ [ 0, 0, 1 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+            <ObstacleBox position={ [ 0, 0, 0 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+            <ObstacleBox position={ [ 0, 0, -1 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
+        <Obstacle ref={ obstacle2 }>
+            <ObstacleBox position={ [ 0, 2.5, 0.5 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+            <ObstacleBox position={ [ 0, 2.5, -0.5 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
     </group>
 }
 
 export function BlockPlatform({ position = [ 0, 0, 0 ] })
 {
     const obstacle = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const x = Math.sin(time + timeOffset)
-        obstacle.current.setNextKinematicTranslation({ x: position[0] + x, y: position[1], z: position[2] })
+        const x = Math.sin(time)
+        setNextTranslation(obstacle.current, position[0] + x, position[1], position[2])
     })
 
     return <group position={ position }>
-        <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={ [ 0, -0.1, 0 ] } geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 2, 0.2, 4 ] } castShadow receiveShadow />
-        </RigidBody>
+        <Obstacle ref={ obstacle }>
+            <ObstacleBox position={ [ 0, -0.1, 0 ] } scale={ [ 2, 0.2, 4 ] } />
+        </Obstacle>
     </group>
 }
 
 export function BlockPlatform2({ position = [ 0, 0, 0 ] })
 {
-    const obstacle1 = useRef();
-    const obstacle2 = useRef();
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
+    const obstacle1 = useRef()
+    const obstacle2 = useRef()
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const x = Math.sin(time + timeOffset)
-        obstacle1.current.setNextKinematicTranslation({ x: position[0] + x, y: position[1], z: position[2] })
-        obstacle2.current.setNextKinematicTranslation({ x: position[0] - x, y: position[1], z: position[2] })
+        const x = Math.sin(time)
+        setNextTranslation(obstacle1.current, position[0] + x, position[1], position[2])
+        setNextTranslation(obstacle2.current, position[0] - x, position[1], position[2])
     })
 
     return <group position={ position }>
-        <RigidBody ref={ obstacle1 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={ [ 0, -0.1, 1 ] } geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 1, 0.2, 1 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle2 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={ [ 0, -0.1, -1 ] } geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 1, 0.2, 1 ] } castShadow receiveShadow />
-        </RigidBody>
+        <Obstacle ref={ obstacle1 }>
+            <ObstacleBox position={ [ 0, -0.1, 1 ] } scale={ [ 1, 0.2, 1 ] } />
+        </Obstacle>
+        <Obstacle ref={ obstacle2 }>
+            <ObstacleBox position={ [ 0, -0.1, -1 ] } scale={ [ 1, 0.2, 1 ] } />
+        </Obstacle>
     </group>
 }
 
 export function BlockPlatform3({ position = [ 0, 0, 0 ] })
 {
     const obstacle = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const x = Math.cos(time + timeOffset)
-        const z = Math.sin(time + timeOffset)
-        obstacle.current.setNextKinematicTranslation({ x: position[0] + x, y: position[1], z: position[2] + z })
+        const x = Math.cos(time)
+        const z = Math.sin(time)
+        setNextTranslation(obstacle.current, position[0] + x, position[1], position[2] + z)
     })
 
     return <group position={ position }>
-        <RigidBody ref={ obstacle } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={ [ 0, -0.1, 0 ] } geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 1.5, 0.2, 1.5 ] } castShadow receiveShadow />
-        </RigidBody>
+        <Obstacle ref={ obstacle }>
+            <ObstacleBox position={ [ 0, -0.1, 0 ] } scale={ [ 1.5, 0.2, 1.5 ] } />
+        </Obstacle>
     </group>
 }
 
@@ -313,38 +326,33 @@ export function BlockStairs1({ position = [ 0, 0, 0 ] })
     const obstacle2 = useRef()
     const obstacle3 = useRef()
     const obstacle4 = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const y = Math.sin(time + timeOffset) + 1.15;
-        obstacle1.current.setNextKinematicTranslation({ x: position[0], y: position[1] - y, z: position[2] });
-        obstacle2.current.setNextKinematicTranslation({ x: position[0], y: position[1] + y / 2, z: position[2] });
-        obstacle3.current.setNextKinematicTranslation({ x: position[0], y: position[1] - y / 2, z: position[2] });
-        obstacle4.current.setNextKinematicTranslation({ x: position[0], y: position[1] + y, z: position[2] });
+        const y = Math.sin(time) + 1.15
+        setNextTranslation(obstacle1.current, position[0], position[1] - y, position[2])
+        setNextTranslation(obstacle2.current, position[0], position[1] + y / 2, position[2])
+        setNextTranslation(obstacle3.current, position[0], position[1] - y / 2, position[2])
+        setNextTranslation(obstacle4.current, position[0], position[1] + y, position[2])
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, -0.1, 1.5 ] } scale={ [ 4, 0.2, 1 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle1 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 2.25, 1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle2 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0, 0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle3 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 2.25, 0 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle4 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0, -0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 1.5, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 2.75, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
+        <BlockFloor position={ [ 0, -0.1, 1.5 ] } scale={ [ 4, 0.2, 1 ] } />
+        <Obstacle ref={ obstacle1 }>
+            <ObstacleBox position={ [ 0, 2.25, 1 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
+        <Obstacle ref={ obstacle2 }>
+            <ObstacleBox position={ [ 0, 0, 0.5 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
+        <Obstacle ref={ obstacle3 }>
+            <ObstacleBox position={ [ 0, 2.25, 0 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
+        <Obstacle ref={ obstacle4 }>
+            <ObstacleBox position={ [ 0, 0, -0.5 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
+        <Obstacle>
+            <ObstacleBox position={ [ 0, 1.5, -1 ] } scale={ [ 3.5, 2.75, 0.5 ] } />
+        </Obstacle>
     </group>
 }
 
@@ -352,32 +360,27 @@ export function BlockStairs2({ position = [ 0, 0, 0 ] })
 {
     const obstacle1 = useRef()
     const obstacle2 = useRef()
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useBlockAnimation((time) =>
     {
-        const time = state.clock.getElapsedTime()
-
-        const y = Math.sin(time + timeOffset) + 1.15;
-        obstacle1.current.setNextKinematicTranslation({ x: position[0], y: position[1] - y, z: position[2] });
-        obstacle2.current.setNextKinematicTranslation({ x: position[0], y: position[1] + y / 2, z: position[2] });
+        const y = Math.sin(time) + 1.15
+        setNextTranslation(obstacle1.current, position[0], position[1] - y, position[2])
+        setNextTranslation(obstacle2.current, position[0], position[1] + y / 2, position[2])
     })
 
     return <group position={ position }>
-        <RigidBody type="fixed" restitution={ 0.2 } friction={ 1 }>
-            <mesh geometry={ boxGeometry } material={ floor2Material } position={ [ 0, -0.1, 0 ] } scale={ [ 4, 0.2, 4 ] }  receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle1 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 2.25, 1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 2.25, -1 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0.75, 0 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 2, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
-        <RigidBody ref={ obstacle2 } type="kinematicPosition" position={ [ 0, 0.3, 0 ] } restitution={ 0.2 } friction={ 0 }>
-            <mesh position={[ 0, 0, 0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-            <mesh position={[ 0, 0, -0.5 ]} geometry={ boxGeometry } material={ obstacleMaterial } scale={ [ 3.5, 0.5, 0.5 ] } castShadow receiveShadow />
-        </RigidBody>
+        <BlockFloor />
+        <Obstacle ref={ obstacle1 }>
+            <ObstacleBox position={ [ 0, 2.25, 1 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+            <ObstacleBox position={ [ 0, 2.25, -1 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
+        <Obstacle>
+            <ObstacleBox position={ [ 0, 0.75, 0 ] } scale={ [ 3.5, 2, 0.5 ] } />
+        </Obstacle>
+        <Obstacle ref={ obstacle2 }>
+            <ObstacleBox position={ [ 0, 0, 0.5 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+            <ObstacleBox position={ [ 0, 0, -0.5 ] } scale={ [ 3.5, 0.5, 0.5 ] } />
+        </Obstacle>
     </group>
 }
 
@@ -406,24 +409,24 @@ function Bounds({ length = 1 })
                 scale={ [ 4, 2, 0.3 ] }
                 receiveShadow
             />
-            {/* Invisible Walls */}
-            <mesh
+            {/* Invisible Walls - colliders only, nothing to render */}
+            <CuboidCollider
+                args={ [ 0.15, 1.5, 2 * length ] }
                 position={ [ 2.15, 3.5, - (length * 2) + 2 ] }
-                geometry={ boxGeometry }
-                material={ invisibleWallMaterial }
-                scale={ [ 0.3, 3, 4 * length ] }
+                restitution={ 0.2 }
+                friction={ 0 }
             />
-            <mesh
+            <CuboidCollider
+                args={ [ 0.15, 1.5, 2 * length ] }
                 position={ [ - 2.15, 3.5, - (length * 2) + 2 ] }
-                geometry={ boxGeometry }
-                material={ invisibleWallMaterial }
-                scale={ [ 0.3, 3, 4 * length ] }
+                restitution={ 0.2 }
+                friction={ 0 }
             />
-            <mesh
+            <CuboidCollider
+                args={ [ 2, 1.5, 0.15 ] }
                 position={ [ 0, 3.5, - (length * 4) + 2] }
-                geometry={ boxGeometry }
-                material={ invisibleWallMaterial }
-                scale={ [ 4, 3, 0.3 ] }
+                restitution={ 0.2 }
+                friction={ 0 }
             />
             {/* <CuboidCollider
                 type="fixed"
@@ -436,9 +439,12 @@ function Bounds({ length = 1 })
     </>
 }
 
+// Defined once so the useMemo below isn't invalidated by a new array on every render
+const defaultTypes = [ BlockSpinner, BlockSpinner2, BlockAxe, BlockLimbo, BlockStrip, BlockPlatform, BlockPlatform2, BlockPlatform3, BlockStairs1, BlockStairs2 ]
+
 export function Level({
     count = 5,
-    types = [ BlockSpinner, BlockSpinner2, BlockAxe, BlockLimbo, BlockStrip, BlockPlatform, BlockPlatform2, BlockPlatform3, BlockStairs1, BlockStairs2 ],
+    types = defaultTypes,
     seed = 0,
     level = 1
 })
@@ -455,12 +461,12 @@ export function Level({
 
         return blocks
     }, [ count, types, seed, level ])
-    
+
     return <>
         <BlockStart position={ [ 0, 0, 0 ] } level={ level } />
 
         { blocks.map((Block, index) => <Block key={ index } position={ [ 0, 0, - (index + 1) * 4 ] } />) }
-        
+
         <BlockEnd position={ [ 0, 0, - (count + 1) * 4 ] } level={ level } key={ level } />
 
         <Bounds length={ count + 2 } />

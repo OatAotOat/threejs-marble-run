@@ -1,39 +1,32 @@
 import { Physics } from '@react-three/rapier'
 import { useThree } from '@react-three/fiber'
-import { useEffect } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import useGame from './stores/useGame.jsx'
 import Lights from './Lights.jsx'
 import { Level } from './Level.jsx'
 import Player from './Player.jsx'
-import { Perf } from 'r3f-perf'
-import { Vignette, Bloom, EffectComposer, ToneMapping, DepthOfField, Noise, ChromaticAberration } from '@react-three/postprocessing'
-import { BlendFunction, ToneMappingMode } from 'postprocessing'
-import { Environment } from '@react-three/drei'
+import Effects from './Effects.jsx'
+import { PerformanceMonitor } from '@react-three/drei'
+import useQuality from './stores/useQuality.jsx'
+import { getCameraFov, isMobileDevice } from './device.js'
+
+const debug = window.location.hash === '#debug'
+
+const Perf = lazy(() => import('r3f-perf').then((module) => ({ default: module.Perf })))
 
 export default function Experience()
 {
     const blocksCount = useGame((state) => state.blocksCount)
     const blocksSeed = useGame(state => state.blocksSeed)
     const level = useGame(state => state.level)
-    
+    const adaptive = useQuality((state) => state.adaptive)
+    const setQuality = useQuality((state) => state.setQuality)
+
     const { camera } = useThree();
-
-    const checkIfMobile = () => {
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-        const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0)
-        const isSmallScreen = window.innerWidth <= 768
-        
-        return isMobile || isTouchDevice || isSmallScreen;
-    }
-
-    const checkIfMediumScreen = () => {
-        return window.innerWidth > 768 && window.innerWidth <= 1024;
-    }
 
     useEffect(() => {
         const updateCameraFov = () => {
-            const newFov = checkIfMobile() ? 100 : checkIfMediumScreen() ? 75 : 45;
-            camera.fov = newFov
+            camera.fov = getCameraFov()
             camera.updateProjectionMatrix()
         }
 
@@ -47,47 +40,28 @@ export default function Experience()
     }, [camera])
 
     return <>
-        <Environment 
-            background
-            // files="./citrus_orchard_road_puresky_4k.hdr"
-        >
-            <color args={ [ '#bdedfc' ] } attach="background" />
+        <color args={ [ '#bdedfc' ] } attach="background" />
 
-            <EffectComposer multisampling={ 0 }>
-                <Vignette
-                    eskil={ false }
-                    offset={ 0.15 }
-                    darkness={ 0.75 }
-                    blendFunction={ BlendFunction.NORMAL }
-                />
-                <Bloom
-                    mipmapBlur
-                    intensity={ 1 }
-                    luminanceThreshold={ 0.9 }
-                />
-                {/* <DepthOfField 
-                    focusRange={ 5 }
-                    focalLength={ 10 } 
-                    bokehScale={ 10 } 
-                /> */}
-                <ChromaticAberration />
-                <ToneMapping 
-                    mode={ ToneMappingMode.ACES_FILMIC }
-                />
-            </EffectComposer>
+        { adaptive && <PerformanceMonitor
+            onIncline={ () => setQuality('high') }
+            onDecline={ () => setQuality('low') }
+            flipflops={ 3 }
+            onFallback={ () => setQuality('low') }
+        /> }
 
-            { !checkIfMobile() && <Perf position="top-left" />}
+        <Effects />
 
-            <Physics debug={ true }>
-                <Lights />
-                <Level 
-                    count={ blocksCount } 
-                    seed={ blocksSeed } 
-                    level={ level }
-                    key={ level } 
-                />
-                <Player />
-            </Physics>
-        </Environment>
+        { debug && !isMobileDevice() && <Suspense fallback={ null }><Perf position="top-left" /></Suspense> }
+
+        <Physics debug={ debug }>
+            <Lights />
+            <Level
+                count={ blocksCount }
+                seed={ blocksSeed }
+                level={ level }
+                key={ level }
+            />
+            <Player />
+        </Physics>
     </>
 }

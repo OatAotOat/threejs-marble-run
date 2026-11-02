@@ -37,7 +37,7 @@ export default {
     {
         outDir: '../build', // Output in the build/ folder
         emptyOutDir: true, // Empty the folder first
-        sourcemap: true // Add sourcemap
+        sourcemap: false // Source maps add ~9 MB to the deploy
     },
-    base: '/threejs-marble-run', // Set base for gh-pages
+    base: '/threejs-marble-run/', // Set base for gh-pages
 }

@@ -1,23 +1,14 @@
 import './style.css'
 import ReactDOM from 'react-dom/client'
 import { Canvas } from '@react-three/fiber'
-import Experience from './Experience.jsx'
+import { lazy, Suspense } from 'react'
 import { KeyboardControls } from '@react-three/drei'
 import Interface from './Interface.jsx'
+import { getCameraFov } from './device.js'
 
-const isMobileDevice = () => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0)
-    const isSmallScreen = window.innerWidth <= 768
-    
-    return isMobile || isTouchDevice || isSmallScreen;
-}
+const Experience = lazy(() => import('./Experience.jsx'))
 
-const isMediumScreen = () => {
-    return window.innerWidth > 768 && window.innerWidth <= 1024;
-}
-
-const initialFov = isMobileDevice() ? 100 : isMediumScreen() ? 75 : 45;
+const initialFov = getCameraFov()
 
 const preventDrag = (e) => {
     e.preventDefault()
@@ -47,6 +38,7 @@ root.render(
     >
         <Canvas
             shadows
+            dpr={ [ 1, 1.5 ] }
             camera={ {
                 fov: initialFov,
                 near: 0.1,
@@ -54,7 +46,9 @@ root.render(
                 position: [ 2.5, 4, 6 ]
             } }
         >
-            <Experience />
+            <Suspense fallback={ null }>
+                <Experience />
+            </Suspense>
         </Canvas>
         <Interface />
     </KeyboardControls>

@@ -29,7 +29,7 @@ export default create(subscribeWithSelector((set) =>
                         startTime: Date.now()
                     }
 
-                return {}
+                return state // Same object, So No Listeners Are Notified
             })
         },
         
@@ -51,7 +51,7 @@ export default create(subscribeWithSelector((set) =>
                 if (state.phase === 'playing' || state.phase === 'ended')
                     return nextState
 
-                return {}
+                return state // Same object, So No Listeners Are Notified
             })
         },
 
@@ -61,7 +61,7 @@ export default create(subscribeWithSelector((set) =>
             {
                 if(state.phase === 'playing')
                     return { phase: 'ended',  endTime: Date.now() }
-                return {}
+                return state // Same object, So No Listeners Are Notified
             })
         },
         

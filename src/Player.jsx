@@ -5,6 +5,29 @@ import { useState, useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import useGame from './stores/useGame.jsx'
 import usePlayer from './stores/usePlayer.jsx'
+import useQuality from './stores/useQuality.jsx'
+
+const marbleGlassMaterial = new THREE.MeshPhysicalMaterial({
+    color: 'magenta',
+    roughness: 0.1,
+    metalness: 0,
+    transmission: 1,
+    ior: 2.33,
+    thickness: 0.15,
+    iridescence: 1,
+    iridescenceIOR: 2.33,
+    reflectivity: 1,
+    dispersion: 0.75,
+})
+
+const marbleGlossyMaterial = new THREE.MeshPhysicalMaterial({
+    color: 'magenta',
+    roughness: 0.1,
+    metalness: 0,
+    clearcoat: 1,
+    iridescence: 1,
+    iridescenceIOR: 2.33,
+})
 
 export default function Player()
 {
@@ -13,19 +36,16 @@ export default function Player()
     const { rapier, world } = useRapier()
     const [ smoothedCameraPosition ] = useState(() => new THREE.Vector3(10, 10, 10))
     const [ smoothedCameraTarget ] = useState(() => new THREE.Vector3())
+    const [ cameraPosition ] = useState(() => new THREE.Vector3())
+    const [ cameraTarget ] = useState(() => new THREE.Vector3())
+    const [ impulse ] = useState(() => ({ x: 0, y: 0, z: 0 }))
+    const [ torque ] = useState(() => ({ x: 0, y: 0, z: 0 }))
     const start = useGame((state) => state.start)
     const end = useGame((state) => state.end)
     const restart = useGame((state) => state.restart)
-    const blocksCount = useGame((state) => state.blocksCount)
-    const phase = useGame((state) => state.phase)
+    const highQuality = useQuality((state) => state.quality === 'high')
 
-    const playerForward = usePlayer((state) => state.playerForward)
-    const playerBackward = usePlayer((state) => state.playerBackward)
-    const playerLeftward = usePlayer((state) => state.playerLeftward)
-    const playerRightward = usePlayer((state) => state.playerRightward)
-    const playerJump = usePlayer((state) => state.playerJump)
-
-    const [ jumpSound ] = useState(() => new Audio(new Audio(`${import.meta.env.BASE_URL}/action_jump.mp3`)))
+    const [ jumpSound ] = useState(() => new Audio(`${import.meta.env.BASE_URL}action_jump.mp3`))
 
     const jump = () =>
     {
@@ -40,7 +60,7 @@ export default function Player()
             body.current.applyImpulse({ x: 0, y: 0.5, z: 0 });
 
             jumpSound.currentTime = 0;
-            jumpSound.volume = 2 / (smoothedCameraPosition.distanceTo(smoothedCameraTarget)); 
+            jumpSound.volume = Math.min(1, 2 / (smoothedCameraPosition.distanceTo(smoothedCameraTarget)));
             jumpSound.play();
         }
     }
@@ -101,11 +121,10 @@ export default function Player()
 
     useFrame((state, delta) =>
     {
-        /**
-         * Controls - Combine keyboard and button inputs
-         */
         const keyboardControls = getKeys()
-        
+        const { playerForward, playerBackward, playerLeftward, playerRightward, playerJump } = usePlayer.getState()
+        const { blocksCount, phase } = useGame.getState()
+
         const forward = keyboardControls.forward || playerForward
         const backward = keyboardControls.backward || playerBackward
         const leftward = keyboardControls.leftward || playerLeftward
@@ -114,8 +133,8 @@ export default function Player()
         if(playerForward || playerBackward || playerLeftward || playerRightward || playerJump)
             start()
 
-        const impulse = { x: 0, y: 0, z: 0 }
-        const torque = { x: 0, y: 0, z: 0 }
+        impulse.x = impulse.y = impulse.z = 0
+        torque.x = torque.y = torque.z = 0
 
         const impulseStrength = 0.6 * delta
         const torqueStrength = 0.2 * delta
@@ -152,12 +171,10 @@ export default function Player()
          */
         const bodyPosition = body.current.translation()
     
-        const cameraPosition = new THREE.Vector3()
         cameraPosition.copy(bodyPosition)
         cameraPosition.z += 2.25
         cameraPosition.y += 0.65
 
-        const cameraTarget = new THREE.Vector3()
         cameraTarget.copy(bodyPosition)
         cameraTarget.y += 0.25
 
@@ -187,20 +204,12 @@ export default function Player()
         angularDamping={ 0.5 }
         position={ [ 0, 1, 0 ] }
     >
-        <mesh castShadow receiveShadow>
+        <mesh
+            material={ highQuality ? marbleGlassMaterial : marbleGlossyMaterial }
+            castShadow
+            receiveShadow
+        >
             <sphereGeometry args={ [ 0.3, 48, 48 ] } />
-            <meshPhysicalMaterial 
-                color="magenta"
-                roughness={ 0.1 } 
-                metalness={ 0 } 
-                transmission={ 1 }
-                ior={ 2.33 }
-                thickness={ 0.15 }
-                iridescence={ 1 }
-                iridescenceIOR={ 2.33 }
-                reflectivity={ 1 }
-                dispersion={ 0.75 }
-            />
         </mesh>
     </RigidBody>
 }

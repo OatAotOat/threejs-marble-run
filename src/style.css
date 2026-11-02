@@ -1,3 +1,11 @@
+/* Self-hosted, same file the 3D Text uses, so no request to Google Fonts */
+@font-face
+{
+    font-family: 'Bebas Neue';
+    src: url('/bebas-neue-v9-latin-regular.woff') format('woff');
+    font-display: swap;
+}
+
 html,
 body,
 #root
