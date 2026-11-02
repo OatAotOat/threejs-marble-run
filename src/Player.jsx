@@ -122,46 +122,32 @@ export default function Player()
     useFrame((state, delta) =>
     {
         const keyboardControls = getKeys()
-        const { playerForward, playerBackward, playerLeftward, playerRightward, playerJump } = usePlayer.getState()
+        const { joystickX, joystickY, playerJump } = usePlayer.getState()
         const { blocksCount, phase } = useGame.getState()
 
-        const forward = keyboardControls.forward || playerForward
-        const backward = keyboardControls.backward || playerBackward
-        const leftward = keyboardControls.leftward || playerLeftward
-        const rightward = keyboardControls.rightward || playerRightward
-
-        if(playerForward || playerBackward || playerLeftward || playerRightward || playerJump)
+        if(joystickX || joystickY || playerJump)
             start()
 
-        impulse.x = impulse.y = impulse.z = 0
-        torque.x = torque.y = torque.z = 0
+        let inputX = joystickX
+        let inputZ = joystickY
+
+        if(keyboardControls.forward)
+            inputZ -= 1
+        if(keyboardControls.backward)
+            inputZ += 1
+        if(keyboardControls.leftward)
+            inputX -= 1
+        if(keyboardControls.rightward)
+            inputX += 1
 
         const impulseStrength = 0.6 * delta
         const torqueStrength = 0.2 * delta
 
-        if(forward)
-        {
-            impulse.z -= impulseStrength
-            torque.x -= torqueStrength
-        }
+        impulse.x = inputX * impulseStrength
+        impulse.z = inputZ * impulseStrength
 
-        if(rightward)
-        {
-            impulse.x += impulseStrength
-            torque.z -= torqueStrength
-        }
-
-        if(backward)
-        {
-            impulse.z += impulseStrength
-            torque.x += torqueStrength
-        }
-        
-        if(leftward)
-        {
-            impulse.x -= impulseStrength
-            torque.z += torqueStrength
-        }
+        torque.x = inputZ * torqueStrength
+        torque.z = - inputX * torqueStrength
 
         body.current.applyImpulse(impulse)
         body.current.applyTorqueImpulse(torque)

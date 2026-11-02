@@ -4,16 +4,11 @@ import { subscribeWithSelector } from 'zustand/middleware'
 export default create(subscribeWithSelector((set) =>
 {
     return {
-        playerForward: false,
-        playerBackward: false,
-        playerLeftward: false,
-        playerRightward: false,
+        joystickX: 0,
+        joystickY: 0,
         playerJump: false,
 
-        setPlayerForward: (value) => set(() => ({ playerForward: value })),
-        setPlayerBackward: (value) => set(() => ({ playerBackward: value })),
-        setPlayerLeftward: (value) => set(() => ({ playerLeftward: value })),
-        setPlayerRightward: (value) => set(() => ({ playerRightward: value })),
+        setJoystick: (x, y) => set(() => ({ joystickX: x, joystickY: y })),
         setPlayerJump: (value) => set(() => ({ playerJump: value }) ),
     }
 }));
