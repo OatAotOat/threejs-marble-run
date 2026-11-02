@@ -43,12 +43,16 @@ export default function Player()
     const start = useGame((state) => state.start)
     const end = useGame((state) => state.end)
     const restart = useGame((state) => state.restart)
+    const fall = useGame((state) => state.fall)
     const highQuality = useQuality((state) => state.quality === 'high')
 
     const [ jumpSound ] = useState(() => new Audio(`${import.meta.env.BASE_URL}action_jump.mp3`))
 
     const jump = () =>
     {
+        if(useGame.getState().phase === 'paused')
+            return
+
         const origin = body.current.translation()
         origin.y -= 0.31
         const direction = { x: 0, y: - 1, z: 0 }
@@ -125,6 +129,9 @@ export default function Player()
         const { joystickX, joystickY, playerJump } = usePlayer.getState()
         const { blocksCount, phase } = useGame.getState()
 
+        if(phase === 'paused' || !body.current)
+            return
+
         if(joystickX || joystickY || playerJump)
             start()
 
@@ -164,8 +171,11 @@ export default function Player()
         cameraTarget.copy(bodyPosition)
         cameraTarget.y += 0.25
 
-        smoothedCameraPosition.lerp(cameraPosition, 5 * delta)
-        smoothedCameraTarget.lerp(cameraTarget, 5 * delta)
+        // Unlike 5 * delta, stays below 1 on slow frames so the camera can't overshoot
+        const cameraSmoothing = 1 - Math.exp(- 5 * delta)
+
+        smoothedCameraPosition.lerp(cameraPosition, cameraSmoothing)
+        smoothedCameraTarget.lerp(cameraTarget, cameraSmoothing)
 
         state.camera.position.copy(smoothedCameraPosition)
         state.camera.lookAt(smoothedCameraTarget)
@@ -176,8 +186,13 @@ export default function Player()
         if(bodyPosition.z < - (blocksCount * 4 + 2) && bodyPosition.y > 0)
             end()
 
-        if(bodyPosition.y < - 4 && phase !== 'ready')
-            restart()
+        if(bodyPosition.y < - 4)
+        {
+            if(phase === 'playing')
+                fall()
+            else if(phase === 'ended')
+                restart()
+        }
     })
 
     return <RigidBody

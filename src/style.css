@@ -227,3 +227,203 @@ canvas {
     background: #ffffff99;
     transform: scale(0.92);
 }
+
+/**
+ * Best Time
+ */
+.time .best
+{
+    font-size: 0.45em;
+    opacity: 0.8;
+}
+
+/**
+ * Start
+ */
+.start-overlay
+{
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    color: #ffffff;
+    background: #00000066;
+    text-shadow: 0 2px 8px #00000055;
+    opacity: 0;
+    transition: opacity 0.3s;
+    pointer-events: none;
+}
+
+.start-overlay.visible
+{
+    opacity: 1;
+}
+
+.start-overlay .title
+{
+    font-size: 7vh;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse
+{
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+/**
+ * Fall
+ */
+.fall
+{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 14vh;
+    text-shadow: 0 2px 12px #00000066;
+    background: #ff000033;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.fall.visible
+{
+    opacity: 1;
+}
+
+/**
+ * New Record
+ */
+.new-record
+{
+    position: absolute;
+    top: 28%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    color: #ffd700;
+    font-size: 8vh;
+    text-shadow: 0 2px 8px #00000066;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/**
+ * Pause
+ */
+.pause-button
+{
+    position: absolute;
+    top: calc(2.5% + env(safe-area-inset-top));
+    right: calc(2.5% + env(safe-area-inset-right));
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: #00000033;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 28px;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pause-menu
+{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2vh;
+    background: #00000066;
+    color: #ffffff;
+    pointer-events: auto;
+}
+
+.pause-menu .title
+{
+    font-size: 10vh;
+}
+
+.menu-button
+{
+    min-width: 200px;
+    padding: 1vh 4vh;
+    border: 2px solid #ffffff;
+    background: #ffffff33;
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 5vh;
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.menu-button:active
+{
+    background: #ffffff66;
+}
+
+/**
+ * Loading
+ */
+.loader
+{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2vh;
+    background: #bdedfc;
+    color: #ffffff;
+    font-size: 6vh;
+    text-shadow: 0 2px 8px #00000044;
+    transition: opacity 0.5s;
+    pointer-events: auto;
+}
+
+.loader.hidden
+{
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader-bar
+{
+    position: relative;
+    width: 30vmin;
+    height: 6px;
+    background: #ffffff55;
+    overflow: hidden;
+}
+
+.loader-bar::after
+{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40%;
+    height: 100%;
+    background: #ffffff;
+    animation: loading 1s ease-in-out infinite;
+}
+
+@keyframes loading
+{
+    from { transform: translateX(-100%); }
+    to { transform: translateX(250%); }
+}

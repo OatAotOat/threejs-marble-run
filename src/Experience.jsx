@@ -19,10 +19,18 @@ export default function Experience()
     const blocksCount = useGame((state) => state.blocksCount)
     const blocksSeed = useGame(state => state.blocksSeed)
     const level = useGame(state => state.level)
+    const paused = useGame((state) => state.phase === 'paused')
+    const setLoaded = useGame((state) => state.setLoaded)
     const adaptive = useQuality((state) => state.adaptive)
     const setQuality = useQuality((state) => state.setQuality)
 
     const { camera } = useThree();
+
+    // Runs once everything in the Suspense boundary (physics, models, fonts) is ready
+    useEffect(() =>
+    {
+        setLoaded()
+    }, [])
 
     useEffect(() => {
         const updateCameraFov = () => {
@@ -53,7 +61,7 @@ export default function Experience()
 
         { debug && !isMobileDevice() && <Suspense fallback={ null }><Perf position="top-left" /></Suspense> }
 
-        <Physics debug={ debug }>
+        <Physics debug={ debug } paused={ paused }>
             <Lights />
             <Level
                 count={ blocksCount }

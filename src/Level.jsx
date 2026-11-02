@@ -3,8 +3,14 @@ import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { useMemo, useState, useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float, Text, useGLTF, Sparkles } from '@react-three/drei'
+import useGame from './stores/useGame.jsx'
+import { isMobileDevice } from './device.js'
 
 const fontURL = `${import.meta.env.BASE_URL}bebas-neue-v9-latin-regular.woff`
+
+const startHints = isMobileDevice()
+    ? 'Left Side : Roll\nButton : Jump'
+    : 'WASD / Arrows : Roll\nSpace : Jump\nR : Restart\nEsc : Pause'
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -19,6 +25,9 @@ const kinematicTranslation = { x: 0, y: 0, z: 0 }
 
 const setNextRotation = (body, x, y, z) =>
 {
+    if(!body)
+        return
+
     kinematicEuler.set(x, y, z)
     kinematicRotation.setFromEuler(kinematicEuler)
     body.setNextKinematicRotation(kinematicRotation)
@@ -26,6 +35,9 @@ const setNextRotation = (body, x, y, z) =>
 
 const setNextTranslation = (body, x, y, z) =>
 {
+    if(!body)
+        return
+
     kinematicTranslation.x = x
     kinematicTranslation.y = y
     kinematicTranslation.z = z
@@ -37,11 +49,15 @@ const setNextTranslation = (body, x, y, z) =>
  */
 function useBlockAnimation(animate)
 {
-    const [ timeOffset ] = useState(() => Math.random() * Math.PI * 2)
+    const time = useRef(Math.random() * Math.PI * 2)
 
-    useFrame((state) =>
+    useFrame((state, delta) =>
     {
-        animate(state.clock.getElapsedTime() + timeOffset)
+        if(useGame.getState().phase === 'paused')
+            return
+
+        time.current += delta
+        animate(time.current)
     })
 }
 
@@ -92,6 +108,21 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
                 rotation-y={ - 0.25 }
             >
                 Marble Run Lv.{ level }
+                <meshBasicMaterial toneMapped={ false } />
+            </Text>
+        </Float>
+
+        <Float floatIntensity={ 0.25 } rotationIntensity={ 0.25 }>
+            <Text
+                font={ fontURL }
+                scale={ 0.12 }
+                lineHeight={ 1.1 }
+                textAlign="left"
+                anchorX="right"
+                position={ [ - 0.45, 0.65, 0 ] }
+                rotation-y={ 0.25 }
+            >
+                { startHints }
                 <meshBasicMaterial toneMapped={ false } />
             </Text>
         </Float>
