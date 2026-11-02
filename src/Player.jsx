@@ -6,6 +6,19 @@ import * as THREE from 'three'
 import useGame from './stores/useGame.jsx'
 import usePlayer from './stores/usePlayer.jsx'
 import useQuality from './stores/useQuality.jsx'
+import useSound from './stores/useSound.jsx'
+
+const soundURL = (file) => `${import.meta.env.BASE_URL}${file}`
+
+const playSound = (sound, volume = 1) =>
+{
+    if(useSound.getState().muted)
+        return
+
+    sound.currentTime = 0
+    sound.volume = volume
+    sound.play().catch(() => {})
+}
 
 const marbleGlassMaterial = new THREE.MeshPhysicalMaterial({
     color: 'magenta',
@@ -46,7 +59,13 @@ export default function Player()
     const fall = useGame((state) => state.fall)
     const highQuality = useQuality((state) => state.quality === 'high')
 
-    const [ jumpSound ] = useState(() => new Audio(`${import.meta.env.BASE_URL}action_jump.mp3`))
+    const [ jumpSound ] = useState(() => new Audio(soundURL('action_jump.mp3')))
+    const [ collisionSound ] = useState(() => new Audio(soundURL('billiard.mp3')))
+    const [ fallSound ] = useState(() => new Audio(soundURL('Info_swoop_out1.mp3')))
+    const [ finishSound ] = useState(() => new Audio(soundURL('Web_partypopper.mp3')))
+
+    const [ previousVelocity ] = useState(() => new THREE.Vector3())
+    const lastImpactTime = useRef(0)
 
     const jump = () =>
     {
@@ -63,10 +82,28 @@ export default function Player()
         {
             body.current.applyImpulse({ x: 0, y: 0.5, z: 0 });
 
-            jumpSound.currentTime = 0;
-            jumpSound.volume = Math.min(1, 2 / (smoothedCameraPosition.distanceTo(smoothedCameraTarget)));
-            jumpSound.play();
+            playSound(jumpSound, Math.min(1, 2 / (smoothedCameraPosition.distanceTo(smoothedCameraTarget))))
         }
+    }
+
+    const handleCollision = ({ manifold, other }) =>
+    {
+        const normal = manifold.normal()
+        const otherVelocity = other.rigidBody?.linvel() ?? { x: 0, y: 0, z: 0 }
+
+        const impact = Math.abs(
+            (previousVelocity.x - otherVelocity.x) * normal.x +
+            (previousVelocity.y - otherVelocity.y) * normal.y +
+            (previousVelocity.z - otherVelocity.z) * normal.z
+        )
+
+        const now = performance.now()
+
+        if(impact < 0.6 || now - lastImpactTime.current < 150)
+            return
+
+        lastImpactTime.current = now
+        playSound(collisionSound, Math.min(1, impact / 4))
     }
     
     const reset = () =>
@@ -86,6 +123,12 @@ export default function Player()
                 {
                     setTimeout(() => { reset() }, 0);
                 }
+
+                if(value === 'falling')
+                    playSound(fallSound)
+
+                if(value === 'ended')
+                    playSound(finishSound)
             }
         )
 
@@ -159,6 +202,8 @@ export default function Player()
         body.current.applyImpulse(impulse)
         body.current.applyTorqueImpulse(torque)
 
+        previousVelocity.copy(body.current.linvel())
+
         /**
          * Camera
          */
@@ -204,6 +249,7 @@ export default function Player()
         linearDamping={ 0.5 }
         angularDamping={ 0.5 }
         position={ [ 0, 1, 0 ] }
+        onCollisionEnter={ handleCollision }
     >
         <mesh
             material={ highQuality ? marbleGlassMaterial : marbleGlossyMaterial }

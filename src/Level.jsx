@@ -10,7 +10,7 @@ const fontURL = `${import.meta.env.BASE_URL}bebas-neue-v9-latin-regular.woff`
 
 const startHints = isMobileDevice()
     ? 'Left Side : Roll\nButton : Jump'
-    : 'WASD / Arrows : Roll\nSpace : Jump\nR : Restart\nEsc : Pause'
+    : 'WASD / Arrows : Roll\nSpace : Jump\nR : Restart\nEsc : Pause\nM : Mute'
 
 const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 

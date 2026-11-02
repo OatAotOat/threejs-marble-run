@@ -427,3 +427,22 @@ canvas {
     from { transform: translateX(-100%); }
     to { transform: translateX(250%); }
 }
+
+/**
+ * Sound
+ */
+.mute-button
+{
+    position: absolute;
+    top: calc(2.5% + env(safe-area-inset-top));
+    left: calc(2.5% + env(safe-area-inset-left));
+    width: 48px;
+    height: 48px;
+    border: none;
+    background: #00000033;
+    font-size: 22px;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}

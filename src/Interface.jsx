@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { addEffect } from '@react-three/fiber'
 import TouchControls from './TouchControls.jsx'
 import { isMobileDevice } from './device.js'
+import useSound from './stores/useSound.jsx'
 
 const isTouch = isMobileDevice()
 
@@ -103,6 +104,9 @@ export default function Interface()
     const newRecord = useGame((state) => state.newRecord)
     const hasStarted = useGame((state) => state.hasStarted)
 
+    const muted = useSound((state) => state.muted)
+    const toggleMuted = useSound((state) => state.toggleMuted)
+
     useEffect(() =>
     {
         const unsubscribeEffect = addEffect(() =>
@@ -142,6 +146,9 @@ export default function Interface()
 
             if(event.code === 'Escape' || event.code === 'KeyP')
                 togglePause()
+
+            if(event.code === 'KeyM')
+                useSound.getState().toggleMuted()
         }
 
         const handleVisibilityChange = () =>
@@ -183,6 +190,9 @@ export default function Interface()
             {/* Restart */}
             { phase === 'ended' && newRecord && <div className="new-record">New Record!</div> }
             { phase === 'ended' && <div className="restart" onClick={ restart }>Next Level</div> }
+
+            {/* Sound */}
+            <button className="mute-button" onClick={ toggleMuted }>{ muted ? '🔇' : '🔊' }</button>
 
             {/* Pause */}
             { phase === 'playing' && <button className="pause-button" onClick={ togglePause }>II</button> }
