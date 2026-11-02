@@ -24,6 +24,7 @@ export default create(subscribeWithSelector((set, get) =>
          * Phases
          */
         phase: 'ready',
+        hasStarted: false,
 
         setLoaded: () => set(() => ({ loaded: true })),
 
@@ -34,7 +35,8 @@ export default create(subscribeWithSelector((set, get) =>
                 if(state.phase === 'ready')
                     return {
                         phase: 'playing',
-                        startTime: Date.now()
+                        startTime: Date.now(),
+                        hasStarted: true
                     }
 
                 return state // Same object, So No Listeners Are Notified

@@ -101,6 +101,7 @@ export default function Interface()
     const loaded = useGame((state) => state.loaded)
     const bestTime = useGame((state) => state.bestTimes[state.level])
     const newRecord = useGame((state) => state.newRecord)
+    const hasStarted = useGame((state) => state.hasStarted)
 
     useEffect(() =>
     {
@@ -172,7 +173,7 @@ export default function Interface()
             </div>
 
             {/* Start */}
-            <div className={ `start-overlay ${ loaded && phase === 'ready' ? 'visible' : '' }` }>
+            <div className={ `start-overlay ${ loaded && phase === 'ready' && !hasStarted ? 'visible' : '' }` }>
                 <div className="title">{ isTouch ? 'Move To Start' : 'Press Any Key To Start' }</div>
             </div>
 
