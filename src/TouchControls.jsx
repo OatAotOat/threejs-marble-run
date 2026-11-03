@@ -1,14 +1,13 @@
 import { useRef, useState } from 'react'
 import usePlayer from './stores/usePlayer.jsx'
+import GyroControls from './GyroControls.jsx'
 
 const stickRadius = 45
 const deadZone = 0.1
 
-export default function TouchControls()
+function Joystick()
 {
     const setJoystick = usePlayer((state) => state.setJoystick)
-    const setPlayerJump = usePlayer((state) => state.setPlayerJump)
-    const playerJump = usePlayer((state) => state.playerJump)
 
     const [ origin, setOrigin ] = useState(null)
     const knob = useRef()
@@ -59,6 +58,28 @@ export default function TouchControls()
         setJoystick(0, 0)
     }
 
+    return <div
+        className="joystick-zone"
+        onPointerDown={ handleStickDown }
+        onPointerMove={ handleStickMove }
+        onPointerUp={ handleStickEnd }
+        onPointerCancel={ handleStickEnd }
+    >
+        <div
+            className={ `joystick ${ origin ? '' : 'idle' }` }
+            style={ origin ? { left: origin.x, top: origin.y } : undefined }
+        >
+            <div ref={ knob } className="joystick-knob" />
+        </div>
+    </div>
+}
+
+export default function TouchControls()
+{
+    const setPlayerJump = usePlayer((state) => state.setPlayerJump)
+    const playerJump = usePlayer((state) => state.playerJump)
+    const tiltEnabled = usePlayer((state) => state.tiltEnabled)
+
     const handleJumpDown = (event) =>
     {
         event.currentTarget.setPointerCapture(event.pointerId)
@@ -71,20 +92,7 @@ export default function TouchControls()
     }
 
     return <>
-        <div
-            className="joystick-zone"
-            onPointerDown={ handleStickDown }
-            onPointerMove={ handleStickMove }
-            onPointerUp={ handleStickEnd }
-            onPointerCancel={ handleStickEnd }
-        >
-            <div
-                className={ `joystick ${ origin ? '' : 'idle' }` }
-                style={ origin ? { left: origin.x, top: origin.y } : undefined }
-            >
-                <div ref={ knob } className="joystick-knob" />
-            </div>
-        </div>
+        { tiltEnabled ? <GyroControls /> : <Joystick /> }
 
         <div
             className={ `jump-button ${ playerJump ? 'active' : '' }` }

@@ -7,6 +7,12 @@ export const isMobileDevice = () =>
     return isMobile || isTouchDevice || isSmallScreen
 }
 
+// Browsers only expose orientation sensors on HTTPS pages
+export const supportsTilt = () =>
+{
+    return isMobileDevice() && 'DeviceOrientationEvent' in window && window.isSecureContext
+}
+
 export const isMediumScreen = () =>
 {
     return window.innerWidth > 768 && window.innerWidth <= 1024

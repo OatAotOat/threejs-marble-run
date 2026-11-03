@@ -42,6 +42,12 @@ const marbleGlossyMaterial = new THREE.MeshPhysicalMaterial({
     iridescenceIOR: 2.33,
 })
 
+const shakeWallImpact = 3
+const shakeLandingImpact = 5.5
+const shakeOffset = 0.15
+const shakeRoll = 0.06
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 export default function Player()
 {
     const body = useRef()
@@ -66,6 +72,7 @@ export default function Player()
 
     const [ previousVelocity ] = useState(() => new THREE.Vector3())
     const lastImpactTime = useRef(0)
+    const cameraTrauma = useRef(0)
 
     const jump = () =>
     {
@@ -104,6 +111,12 @@ export default function Player()
 
         lastImpactTime.current = now
         playSound(collisionSound, Math.min(1, impact / 4))
+
+        const isLanding = Math.abs(normal.y) > 0.7
+        const shakeThreshold = isLanding ? shakeLandingImpact : shakeWallImpact
+
+        if(!reduceMotion && impact > shakeThreshold)
+            cameraTrauma.current = Math.min(1, cameraTrauma.current + 0.5 + (impact - shakeThreshold) * 0.15)
     }
     
     const reset = () =>
@@ -216,7 +229,6 @@ export default function Player()
         cameraTarget.copy(bodyPosition)
         cameraTarget.y += 0.25
 
-        // Unlike 5 * delta, stays below 1 on slow frames so the camera can't overshoot
         const cameraSmoothing = 1 - Math.exp(- 5 * delta)
 
         smoothedCameraPosition.lerp(cameraPosition, cameraSmoothing)
@@ -224,6 +236,18 @@ export default function Player()
 
         state.camera.position.copy(smoothedCameraPosition)
         state.camera.lookAt(smoothedCameraTarget)
+
+        if(cameraTrauma.current > 0)
+        {
+            const shake = cameraTrauma.current * cameraTrauma.current
+            const time = state.clock.elapsedTime * 35
+
+            state.camera.position.x += Math.sin(time * 1.1) * shakeOffset * shake
+            state.camera.position.y += Math.sin(time * 1.7 + 1) * shakeOffset * shake
+            state.camera.rotation.z += Math.sin(time * 1.3 + 2) * shakeRoll * shake
+
+            cameraTrauma.current = Math.max(0, cameraTrauma.current - delta * 1.8)
+        }
 
         /**
         * Phases

@@ -4,10 +4,39 @@ import usePlayer from './stores/usePlayer.jsx'
 import { useEffect, useRef, useState } from 'react'
 import { addEffect } from '@react-three/fiber'
 import TouchControls from './TouchControls.jsx'
-import { isMobileDevice } from './device.js'
+import { isMobileDevice, supportsTilt } from './device.js'
 import useSound from './stores/useSound.jsx'
+import useQuality from './stores/useQuality.jsx'
 
 const isTouch = isMobileDevice()
+const canTilt = supportsTilt()
+
+const toggleTilt = async () =>
+{
+    const { tiltEnabled, setTiltEnabled } = usePlayer.getState()
+
+    if(tiltEnabled)
+    {
+        setTiltEnabled(false)
+        return
+    }
+
+    // iOS asks the player for permission, and only from a tap
+    if(typeof DeviceOrientationEvent.requestPermission === 'function')
+    {
+        try
+        {
+            if(await DeviceOrientationEvent.requestPermission() !== 'granted')
+                return
+        }
+        catch
+        {
+            return
+        }
+    }
+
+    setTiltEnabled(true)
+}
 
 const directions = {
     forward: [ 0, - 1 ],
@@ -106,6 +135,9 @@ export default function Interface()
 
     const muted = useSound((state) => state.muted)
     const toggleMuted = useSound((state) => state.toggleMuted)
+    const qualityMode = useQuality((state) => state.mode)
+    const cycleQualityMode = useQuality((state) => state.cycleMode)
+    const tiltEnabled = usePlayer((state) => state.tiltEnabled)
 
     useEffect(() =>
     {
@@ -191,8 +223,12 @@ export default function Interface()
             { phase === 'ended' && newRecord && <div className="new-record">New Record!</div> }
             { phase === 'ended' && <div className="restart" onClick={ restart }>Next Level</div> }
 
-            {/* Sound */}
-            <button className="mute-button" onClick={ toggleMuted }>{ muted ? '🔇' : '🔊' }</button>
+            {/* Settings */}
+            <div className="settings">
+                <button className="setting-button" onClick={ toggleMuted }>{ muted ? '🔇' : '🔊' }</button>
+                <button className="setting-button text" onClick={ cycleQualityMode }>{ qualityMode }</button>
+                { canTilt && <button className={ `setting-button text ${ tiltEnabled ? 'active' : '' }` } onClick={ toggleTilt }>Tilt</button> }
+            </div>
 
             {/* Pause */}
             { phase === 'playing' && <button className="pause-button" onClick={ togglePause }>II</button> }

@@ -429,20 +429,46 @@ canvas {
 }
 
 /**
- * Sound
+ * Settings
  */
-.mute-button
+.settings
 {
     position: absolute;
     top: calc(2.5% + env(safe-area-inset-top));
     left: calc(2.5% + env(safe-area-inset-left));
-    width: 48px;
+    display: flex;
+    gap: 8px;
+}
+
+.setting-button
+{
+    min-width: 48px;
     height: 48px;
+    padding: 0 10px;
     border: none;
     background: #00000033;
+    color: #ffffff;
     font-size: 22px;
     cursor: pointer;
     pointer-events: auto;
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
+}
+
+.setting-button.text
+{
+    min-width: 64px;
+    font-family: inherit;
+    text-transform: uppercase;
+}
+
+.setting-button.active
+{
+    background: #ffffff66;
+}
+
+@media screen and (max-width: 768px) {
+    .settings {
+        flex-direction: column;
+    }
 }
