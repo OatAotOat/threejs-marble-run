@@ -2,12 +2,13 @@ import { useState, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import useGame, { phases } from '../../../stores/useGame.jsx'
+import { prefersReducedMotion } from '../../../Utils/device.js'
 
 const shakeWallImpact = 3
 const shakeLandingImpact = 5.5
 const shakeOffset = 0.15
 const shakeRoll = 0.06
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const reduceMotion = prefersReducedMotion()
 
 export default function useFollowCamera(body) {
     const [ smoothedPosition ] = useState(() => new THREE.Vector3(10, 10, 10))

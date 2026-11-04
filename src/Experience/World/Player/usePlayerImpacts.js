@@ -8,6 +8,7 @@ const impactCooldown = 150
 
 export default function usePlayerImpacts(body, onImpact) {
     const [ previousVelocity ] = useState(() => new THREE.Vector3())
+    const [ direction ] = useState(() => new THREE.Vector3())
     const lastImpactTime = useRef(0)
 
     useFrame(() => {
@@ -20,17 +21,19 @@ export default function usePlayerImpacts(body, onImpact) {
         const normal = manifold.normal()
         const otherVelocity = other.rigidBody?.linvel() ?? { x: 0, y: 0, z: 0 }
 
-        const impact = Math.abs(
+        const closingSpeed =
             (previousVelocity.x - otherVelocity.x) * normal.x +
             (previousVelocity.y - otherVelocity.y) * normal.y +
             (previousVelocity.z - otherVelocity.z) * normal.z
-        )
 
+        const impact = Math.abs(closingSpeed)
         const now = performance.now()
 
         if (impact < minImpact || now - lastImpactTime.current < impactCooldown) { return }
 
         lastImpactTime.current = now
-        onImpact(impact, Math.abs(normal.y) > 0.7)
+        direction.copy(normal).multiplyScalar(Math.sign(closingSpeed))
+
+        onImpact(impact, Math.abs(normal.y) > 0.7, direction)
     }
 }

@@ -1,12 +1,13 @@
-import { RigidBody } from '@react-three/rapier'
+import { RigidBody, BallCollider } from '@react-three/rapier'
 import { useRef } from 'react'
 import * as THREE from 'three'
 import useQuality from '../../../stores/useQuality.jsx'
-import { spawnPosition } from '../layout.js'
+import { spawnPosition, marbleRadius } from '../layout.js'
 import usePlayerSounds from './usePlayerSounds.js'
 import useFollowCamera from './useFollowCamera.js'
 import usePlayerControls from './usePlayerControls.js'
 import usePlayerImpacts from './usePlayerImpacts.js'
+import usePlayerSquash from './usePlayerSquash.js'
 import usePlayerPhases from './usePlayerPhases.js'
 
 const marbleGlassMaterial = new THREE.MeshPhysicalMaterial({
@@ -42,9 +43,12 @@ export default function Player() {
         onJump: () => playSound('jump', Math.min(1, 2 / camera.distance()))
     })
 
-    const handleCollision = usePlayerImpacts(body, (impact, isLanding) => {
+    const squash = usePlayerSquash()
+
+    const handleCollision = usePlayerImpacts(body, (impact, isLanding, direction) => {
         playSound('collision', Math.min(1, impact / 4))
         camera.shake(impact, isLanding)
+        squash.impact(impact, direction)
     })
 
     usePlayerPhases(body)
@@ -52,20 +56,26 @@ export default function Player() {
     return <RigidBody
         ref={ body }
         canSleep={ false }
-        colliders="ball"
+        colliders={ false }
         restitution={ 0.2 }
         friction={ 1 }
         linearDamping={ 0.5 }
         angularDamping={ 0.5 }
         position={ spawnPosition }
         onCollisionEnter={ handleCollision }
+        onContactForce={ squash.press }
     >
-        <mesh
-            material={ highQuality ? marbleGlassMaterial : marbleGlossyMaterial }
-            castShadow
-            receiveShadow
-        >
-            <sphereGeometry args={ [ 0.3, 48, 48 ] } />
-        </mesh>
+        <BallCollider args={ [ marbleRadius ] } />
+        <group ref={ squash.outer }>
+            <group ref={ squash.inner }>
+                <mesh
+                    material={ highQuality ? marbleGlassMaterial : marbleGlossyMaterial }
+                    castShadow
+                    receiveShadow
+                >
+                    <sphereGeometry args={ [ marbleRadius, 48, 48 ] } />
+                </mesh>
+            </group>
+        </group>
     </RigidBody>
 }
