@@ -1,14 +1,11 @@
-import { Physics } from '@react-three/rapier'
 import { useThree } from '@react-three/fiber'
 import { useEffect, lazy, Suspense } from 'react'
-import useGame from './stores/useGame.jsx'
-import Lights from './Lights.jsx'
-import { Level } from './Level.jsx'
-import Player from './Player.jsx'
-import Effects from './Effects.jsx'
 import { PerformanceMonitor } from '@react-three/drei'
-import useQuality from './stores/useQuality.jsx'
-import { getCameraFov, isMobileDevice } from './device.js'
+import useGame from '../stores/useGame.jsx'
+import useQuality from '../stores/useQuality.jsx'
+import { getCameraFov, isMobileDevice } from '../Utils/device.js'
+import Effects from './Effects.jsx'
+import World from './World/World.jsx'
 
 const debug = window.location.hash === '#debug'
 
@@ -16,21 +13,13 @@ const Perf = lazy(() => import('r3f-perf').then((module) => ({ default: module.P
 
 export default function Experience()
 {
-    const blocksCount = useGame((state) => state.blocksCount)
-    const blocksSeed = useGame(state => state.blocksSeed)
-    const level = useGame(state => state.level)
-    const paused = useGame((state) => state.phase === 'paused')
     const setLoaded = useGame((state) => state.setLoaded)
     const adaptive = useQuality((state) => state.adaptive)
     const setQuality = useQuality((state) => state.setQuality)
 
     const { camera } = useThree();
 
-    // Runs once everything in the Suspense boundary (physics, models, fonts) is ready
-    useEffect(() =>
-    {
-        setLoaded()
-    }, [])
+    useEffect(() => { setLoaded() }, [])
 
     useEffect(() => {
         const updateCameraFov = () => {
@@ -48,8 +37,6 @@ export default function Experience()
     }, [camera])
 
     return <>
-        <color args={ [ '#bdedfc' ] } attach="background" />
-
         { adaptive && <PerformanceMonitor
             onIncline={ () => setQuality('high') }
             onDecline={ () => setQuality('low') }
@@ -61,15 +48,6 @@ export default function Experience()
 
         { debug && !isMobileDevice() && <Suspense fallback={ null }><Perf position="top-left" /></Suspense> }
 
-        <Physics debug={ debug } paused={ paused }>
-            <Lights />
-            <Level
-                count={ blocksCount }
-                seed={ blocksSeed }
-                level={ level }
-                key={ level }
-            />
-            <Player />
-        </Physics>
+        <World debug={ debug } />
     </>
 }

@@ -3,20 +3,16 @@ import ReactDOM from 'react-dom/client'
 import { Canvas } from '@react-three/fiber'
 import { lazy, Suspense } from 'react'
 import { KeyboardControls } from '@react-three/drei'
-import Interface from './Interface.jsx'
-import { getCameraFov } from './device.js'
+import Interface from './Interface/Interface.jsx'
+import { getCameraFov } from './Utils/device.js'
 
-const Experience = lazy(() => import('./Experience.jsx'))
+const Experience = lazy(() => import('./Experience/Experience.jsx'))
 
 const initialFov = getCameraFov()
 
-const preventDrag = (e) => {
-    e.preventDefault()
-}
+const preventDrag = (e) => { e.preventDefault() }
 
-const preventScroll = (e) => {
-    e.preventDefault()
-}
+const preventScroll = (e) => { e.preventDefault() }
 
 document.addEventListener('touchmove', preventScroll, { passive: false })
 document.addEventListener('gesturestart', preventDrag, { passive: false })

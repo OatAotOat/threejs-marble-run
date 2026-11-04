@@ -1,12 +1,12 @@
-import { useKeyboardControls } from '@react-three/drei'
-import useGame from './stores/useGame.jsx'
-import usePlayer from './stores/usePlayer.jsx'
-import { useEffect, useRef, useState } from 'react'
+import useGame from '../stores/useGame.jsx'
+import usePlayer from '../stores/usePlayer.jsx'
+import { useEffect, useRef } from 'react'
 import { addEffect } from '@react-three/fiber'
+import DesktopControls from './DesktopControls.jsx'
 import TouchControls from './TouchControls.jsx'
-import { isMobileDevice, supportsTilt } from './device.js'
-import useSound from './stores/useSound.jsx'
-import useQuality from './stores/useQuality.jsx'
+import { isMobileDevice, supportsTilt } from '../Utils/device.js'
+import useSound from '../stores/useSound.jsx'
+import useQuality from '../stores/useQuality.jsx'
 
 const isTouch = isMobileDevice()
 const canTilt = supportsTilt()
@@ -15,14 +15,13 @@ const toggleTilt = async () =>
 {
     const { tiltEnabled, setTiltEnabled } = usePlayer.getState()
 
-    if(tiltEnabled)
+    if (tiltEnabled)
     {
         setTiltEnabled(false)
         return
     }
 
-    // iOS asks the player for permission, and only from a tap
-    if(typeof DeviceOrientationEvent.requestPermission === 'function')
+    if (typeof DeviceOrientationEvent.requestPermission === 'function')
     {
         try
         {
@@ -36,78 +35,6 @@ const toggleTilt = async () =>
     }
 
     setTiltEnabled(true)
-}
-
-const directions = {
-    forward: [ 0, - 1 ],
-    backward: [ 0, 1 ],
-    leftward: [ - 1, 0 ],
-    rightward: [ 1, 0 ],
-}
-
-function Key({ active, large = false, onPress, onRelease })
-{
-    return <div
-        className={ `key ${ large ? 'large' : '' } ${ active ? 'active' : '' }` }
-        onMouseDown={ onPress }
-        onMouseUp={ onRelease }
-        onMouseLeave={ onRelease }
-    />
-}
-
-function DesktopControls()
-{
-    const forward = useKeyboardControls((state) => state.forward)
-    const backward = useKeyboardControls((state) => state.backward)
-    const leftward = useKeyboardControls((state) => state.leftward)
-    const rightward = useKeyboardControls((state) => state.rightward)
-    const jump = useKeyboardControls((state) => state.jump)
-
-    const setJoystick = usePlayer((state) => state.setJoystick)
-    const setPlayerJump = usePlayer((state) => state.setPlayerJump)
-    const playerJump = usePlayer((state) => state.playerJump)
-
-    const [ heldDirection, setHeldDirection ] = useState(null)
-
-    const pressDirection = (direction) =>
-    {
-        setHeldDirection(direction)
-        setJoystick(...directions[direction])
-    }
-
-    const releaseDirection = (direction) =>
-    {
-        if(heldDirection !== direction)
-            return
-
-        setHeldDirection(null)
-        setJoystick(0, 0)
-    }
-
-    const directionKey = (direction, keyboardActive) => <Key
-        active={ keyboardActive || heldDirection === direction }
-        onPress={ () => pressDirection(direction) }
-        onRelease={ () => releaseDirection(direction) }
-    />
-
-    return <div className="controls">
-        <div className="raw">
-            { directionKey('forward', forward) }
-        </div>
-        <div className="raw">
-            { directionKey('leftward', leftward) }
-            { directionKey('backward', backward) }
-            { directionKey('rightward', rightward) }
-        </div>
-        <div className="raw">
-            <Key
-                large
-                active={ jump || playerJump }
-                onPress={ () => setPlayerJump(true) }
-                onRelease={ () => setPlayerJump(false) }
-            />
-        </div>
-    </div>
 }
 
 const pad = (value, length) => String(value).padStart(length, '0')
@@ -147,46 +74,38 @@ export default function Interface()
 
             let elapsedTime = 0
 
-            if(state.phase === 'playing')
+            if (state.phase === 'playing') {
                 elapsedTime = Date.now() - state.startTime
-            else if(state.phase === 'paused')
+            } else if (state.phase === 'paused') {
                 elapsedTime = state.pausedAt - state.startTime
-            else if(state.phase === 'ended' || state.phase === 'falling')
+            } else if (state.phase === 'ended' || state.phase === 'falling') {
                 elapsedTime = state.endTime - state.startTime
+            }
 
-            if(time.current)
-                time.current.textContent = formatTime(elapsedTime)
+            if (time.current) { time.current.textContent = formatTime(elapsedTime) }
         })
 
-        return () =>
-        {
-            unsubscribeEffect()
-        }
+        return () => { unsubscribeEffect() }
     }, [])
 
     useEffect(() =>
     {
         const handleKeyDown = (event) =>
         {
-            if(event.repeat)
-                return
+            if (event.repeat) { return }
 
             const { phase, restart, togglePause } = useGame.getState()
 
-            if(event.code === 'KeyR' && phase !== 'ended')
-                restart()
+            if (event.code === 'KeyR' && phase !== 'ended') { restart() }
 
-            if(event.code === 'Escape' || event.code === 'KeyP')
-                togglePause()
+            if (event.code === 'Escape' || event.code === 'KeyP') { togglePause() }
 
-            if(event.code === 'KeyM')
-                useSound.getState().toggleMuted()
+            if (event.code === 'KeyM') { useSound.getState().toggleMuted() }
         }
 
         const handleVisibilityChange = () =>
         {
-            if(document.hidden)
-                useGame.getState().pause()
+            if (document.hidden) { useGame.getState().pause() }
         }
 
         window.addEventListener('keydown', handleKeyDown)

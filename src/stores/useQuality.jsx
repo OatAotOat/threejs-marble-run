@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { isMobileDevice } from '../device.js'
+import { isMobileDevice } from '../Utils/device.js'
 
 const modes = [ 'auto', 'high', 'low' ]
 const modeKey = 'marble-run-quality'

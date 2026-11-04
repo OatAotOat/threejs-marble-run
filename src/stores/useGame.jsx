@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { loadBestTimes, saveBestTimes } from '../bestTimes.js'
+import { loadBestTimes, saveBestTimes } from '../Utils/bestTimes.js'
 
 export default create(subscribeWithSelector((set, get) =>
 {
@@ -32,12 +32,13 @@ export default create(subscribeWithSelector((set, get) =>
         {
             set((state) =>
             {
-                if(state.phase === 'ready')
+                if (state.phase === 'ready') {
                     return {
                         phase: 'playing',
                         startTime: Date.now(),
                         hasStarted: true
                     }
+                }
 
                 return state // Same object, So No Listeners Are Notified
             })
@@ -70,15 +71,13 @@ export default create(subscribeWithSelector((set, get) =>
         {
             set((state) =>
             {
-                if(state.phase !== 'playing')
-                    return state // Same object, So No Listeners Are Notified
+                if (state.phase !== 'playing') { return state } // Same object, So No Listeners Are Notified
 
                 const endTime = Date.now()
                 const time = endTime - state.startTime
                 const bestTime = state.bestTimes[state.level]
 
-                if(bestTime !== undefined && time >= bestTime)
-                    return { phase: 'ended', endTime }
+                if (bestTime !== undefined && time >= bestTime) { return { phase: 'ended', endTime } }
 
                 const bestTimes = { ...state.bestTimes, [state.level]: time }
                 saveBestTimes(bestTimes)
@@ -89,15 +88,13 @@ export default create(subscribeWithSelector((set, get) =>
 
         fall: () =>
         {
-            if(get().phase !== 'playing')
-                return
+            if (get().phase !== 'playing') { return }
 
             set(() => ({ phase: 'falling', endTime: Date.now() }))
 
             setTimeout(() =>
             {
-                if(get().phase === 'falling')
-                    get().restart()
+                if (get().phase === 'falling') { get().restart() }
             }, 1000)
         },
 
@@ -105,8 +102,7 @@ export default create(subscribeWithSelector((set, get) =>
         {
             set((state) =>
             {
-                if(state.phase === 'playing')
-                    return { phase: 'paused', pausedAt: Date.now() }
+                if (state.phase === 'playing') { return { phase: 'paused', pausedAt: Date.now() } }
 
                 return state // Same object, So No Listeners Are Notified
             })
@@ -116,8 +112,7 @@ export default create(subscribeWithSelector((set, get) =>
         {
             set((state) =>
             {
-                if(state.phase === 'paused')
-                    return { phase: 'playing', startTime: state.startTime + Date.now() - state.pausedAt }
+                if (state.phase === 'paused') { return { phase: 'playing', startTime: state.startTime + Date.now() - state.pausedAt } }
 
                 return state // Same object, So No Listeners Are Notified
             })
@@ -125,10 +120,8 @@ export default create(subscribeWithSelector((set, get) =>
 
         togglePause: () =>
         {
-            if(get().phase === 'paused')
-                get().resume()
-            else
-                get().pause()
+            if (get().phase === 'paused') { get().resume() }
+            else { get().pause() }
         },
 
     }

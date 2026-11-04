@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import usePlayer from './stores/usePlayer.jsx'
+import usePlayer from '../stores/usePlayer.jsx'
 import GyroControls from './GyroControls.jsx'
 
 const stickRadius = 45
@@ -15,8 +15,7 @@ function Joystick()
 
     const handleStickDown = (event) =>
     {
-        if(activePointer.current !== null)
-            return
+        if (activePointer.current !== null) { return }
 
         activePointer.current = event.pointerId
         event.currentTarget.setPointerCapture(event.pointerId)
@@ -25,15 +24,14 @@ function Joystick()
 
     const handleStickMove = (event) =>
     {
-        if(event.pointerId !== activePointer.current || !origin)
-            return
+        if (event.pointerId !== activePointer.current || !origin) { return }
 
         let x = event.clientX - origin.x
         let y = event.clientY - origin.y
 
         const distance = Math.hypot(x, y)
 
-        if(distance > stickRadius)
+        if (distance > stickRadius)
         {
             x *= stickRadius / distance
             y *= stickRadius / distance
@@ -41,16 +39,13 @@ function Joystick()
 
         knob.current.style.transform = `translate(${ x }px, ${ y }px)`
 
-        if(distance / stickRadius < deadZone)
-            setJoystick(0, 0)
-        else
-            setJoystick(x / stickRadius, y / stickRadius)
+        if (distance / stickRadius < deadZone) { setJoystick(0, 0) }
+        else { setJoystick(x / stickRadius, y / stickRadius) }
     }
 
     const handleStickEnd = (event) =>
     {
-        if(event.pointerId !== activePointer.current)
-            return
+        if (event.pointerId !== activePointer.current) { return }
 
         activePointer.current = null
         knob.current.style.transform = ''

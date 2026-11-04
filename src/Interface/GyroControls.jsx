@@ -1,12 +1,11 @@
 import { useEffect } from 'react'
-import usePlayer from './stores/usePlayer.jsx'
+import usePlayer from '../stores/usePlayer.jsx'
 
 const fullTiltAngle = 20
 const deadZoneAngle = 2
 
 const wrapAngle = (angle) => ((angle + 540) % 360) - 180
 
-// Converts the device's beta / gamma into left-right and forward-back tilt as seen on screen
 const toScreenTilt = (beta, gamma) =>
 {
     const angle = screen.orientation?.angle ?? window.orientation ?? 0
@@ -34,26 +33,24 @@ export default function GyroControls()
 
         const handleOrientation = (event) =>
         {
-            if(event.beta === null || event.gamma === null)
-                return
+            if (event.beta === null || event.gamma === null) { return }
 
             const tilt = toScreenTilt(event.beta, event.gamma)
 
-            if(!neutral)
-                neutral = tilt
+            if (!neutral) { neutral = tilt }
 
             let x = wrapAngle(tilt.x - neutral.x) / fullTiltAngle
             let y = wrapAngle(tilt.y - neutral.y) / fullTiltAngle
 
             const length = Math.hypot(x, y)
 
-            if(length * fullTiltAngle < deadZoneAngle)
+            if (length * fullTiltAngle < deadZoneAngle)
             {
                 setJoystick(0, 0)
                 return
             }
 
-            if(length > 1)
+            if (length > 1)
             {
                 x /= length
                 y /= length
@@ -62,10 +59,7 @@ export default function GyroControls()
             setJoystick(x, y)
         }
 
-        const handleRotation = () =>
-        {
-            neutral = null
-        }
+        const handleRotation = () => { neutral = null }
 
         window.addEventListener('deviceorientation', handleOrientation)
         window.addEventListener('orientationchange', handleRotation)

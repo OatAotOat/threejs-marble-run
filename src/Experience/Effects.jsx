@@ -1,6 +1,6 @@
 import { Vignette, Bloom, EffectComposer, ToneMapping, ChromaticAberration } from '@react-three/postprocessing'
 import { BlendFunction, ToneMappingMode } from 'postprocessing'
-import useQuality from './stores/useQuality.jsx'
+import useQuality from '../stores/useQuality.jsx'
 
 export default function Effects()
 {

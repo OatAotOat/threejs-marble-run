@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 
-export default function Lights()
+export default function Environment()
 {
     const light = useRef()
     
@@ -13,6 +13,8 @@ export default function Lights()
     })
 
     return <>
+        <color args={ [ '#bdedfc' ] } attach="background" />
+
         <directionalLight
             ref={ light }
             castShadow
@@ -23,8 +25,8 @@ export default function Lights()
             shadow-camera-far={ 10 }
             shadow-camera-top={ 10 }
             shadow-camera-right={ 10 }
-            shadow-camera-bottom={ - 10 }
-            shadow-camera-left={ - 10 }
+            shadow-camera-bottom={ -10 }
+            shadow-camera-left={ -10 }
         />
         <ambientLight intensity={ 1.5 } />
     </>
