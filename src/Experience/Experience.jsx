@@ -11,15 +11,14 @@ const debug = window.location.hash === '#debug'
 
 const Perf = lazy(() => import('r3f-perf').then((module) => ({ default: module.Perf })))
 
-export default function Experience()
-{
+export default function Experience() {
     const setLoaded = useGame((state) => state.setLoaded)
     const adaptive = useQuality((state) => state.adaptive)
     const setQuality = useQuality((state) => state.setQuality)
 
-    const { camera } = useThree();
+    const { camera } = useThree()
 
-    useEffect(() => { setLoaded() }, [])
+    useEffect(() => { setLoaded() }, [ setLoaded ])
 
     useEffect(() => {
         const updateCameraFov = () => {
@@ -34,7 +33,7 @@ export default function Experience()
         return () => {
             window.removeEventListener('resize', updateCameraFov)
         }
-    }, [camera])
+    }, [ camera ])
 
     return <>
         { adaptive && <PerformanceMonitor

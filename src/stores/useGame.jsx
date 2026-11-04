@@ -2,8 +2,7 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { loadBestTimes, saveBestTimes } from '../Utils/bestTimes.js'
 
-export default create(subscribeWithSelector((set, get) =>
-{
+export default create(subscribeWithSelector((set, get) => {
     return {
         loaded: false,
 
@@ -28,10 +27,8 @@ export default create(subscribeWithSelector((set, get) =>
 
         setLoaded: () => set(() => ({ loaded: true })),
 
-        start: () =>
-        {
-            set((state) =>
-            {
+        start: () => {
+            set((state) => {
                 if (state.phase === 'ready') {
                     return {
                         phase: 'playing',
@@ -44,18 +41,15 @@ export default create(subscribeWithSelector((set, get) =>
             })
         },
 
-        restart: () =>
-        {
-            set((state) =>
-            {
+        restart: () => {
+            set((state) => {
                 const nextState = {
                     phase: 'ready',
                     blocksSeed: Math.random(),
                     newRecord: false
                 }
 
-                if (state.phase === 'ended')
-                {
+                if (state.phase === 'ended') {
                     nextState.blocksCount = state.blocksCount + (state.blocksCount > 10 ? 2 : 1)
                     nextState.level = state.level + 1
                 }
@@ -67,10 +61,8 @@ export default create(subscribeWithSelector((set, get) =>
             })
         },
 
-        end: () =>
-        {
-            set((state) =>
-            {
+        end: () => {
+            set((state) => {
                 if (state.phase !== 'playing') { return state } // Same object, So No Listeners Are Notified
 
                 const endTime = Date.now()
@@ -86,42 +78,34 @@ export default create(subscribeWithSelector((set, get) =>
             })
         },
 
-        fall: () =>
-        {
+        fall: () => {
             if (get().phase !== 'playing') { return }
 
             set(() => ({ phase: 'falling', endTime: Date.now() }))
 
-            setTimeout(() =>
-            {
+            setTimeout(() => {
                 if (get().phase === 'falling') { get().restart() }
             }, 1000)
         },
 
-        pause: () =>
-        {
-            set((state) =>
-            {
+        pause: () => {
+            set((state) => {
                 if (state.phase === 'playing') { return { phase: 'paused', pausedAt: Date.now() } }
 
                 return state // Same object, So No Listeners Are Notified
             })
         },
 
-        resume: () =>
-        {
-            set((state) =>
-            {
+        resume: () => {
+            set((state) => {
                 if (state.phase === 'paused') { return { phase: 'playing', startTime: state.startTime + Date.now() - state.pausedAt } }
 
                 return state // Same object, So No Listeners Are Notified
             })
         },
 
-        togglePause: () =>
-        {
-            if (get().phase === 'paused') { get().resume() }
-            else { get().pause() }
+        togglePause: () => {
+            if (get().phase === 'paused') { get().resume() } else { get().pause() }
         },
 
     }

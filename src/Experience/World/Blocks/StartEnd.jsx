@@ -10,8 +10,7 @@ import { BlockFloor, floor1Material, setNextRotation } from './Shared.jsx'
 const isTouch = isMobileDevice()
 const desktopHints = 'WASD / Arrows : Roll\nSpace : Jump\nR : Restart\nEsc : Pause\nM : Mute'
 
-export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
-{
+export function BlockStart({ position = [ 0, 0, 0 ], level = 1 }) {
     const tiltEnabled = usePlayer((state) => state.tiltEnabled)
 
     const startHints = isTouch
@@ -25,9 +24,9 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
             position-y={ 1 }
             speed={ 0.2 }
             count={ 30 }
-            color='aqua'
+            color="aqua"
             noise={ 0.5 }
-            type='sphere'
+            type="sphere"
         />
 
         <Float floatIntensity={ 0.25 } rotationIntensity={ 0.25 }>
@@ -63,22 +62,18 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 })
     </group>
 }
 
-export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
-{
+export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 }) {
     const trophy = useGLTF(sources.trophy)
 
-    useEffect(() =>
-    {
-        trophy.scene.children.forEach((mesh) =>
-        {
+    useEffect(() => {
+        trophy.scene.children.forEach((mesh) => {
             mesh.castShadow = true
         })
     }, [ trophy ])
 
-    const trophyRef = useRef();
+    const trophyRef = useRef()
 
-    useFrame((state) =>
-    {
+    useFrame((state) => {
         const time = state.clock.getElapsedTime()
 
         setNextRotation(trophyRef.current, 0, time * -level * 0.01, 0)
@@ -91,9 +86,9 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 })
             position-y={ 1 }
             speed={ 0.2 }
             count={ 30 }
-            color='hotpink'
+            color="hotpink"
             noise={ 0.5 }
-            type='sphere'
+            type="sphere"
         />
 
         <Text

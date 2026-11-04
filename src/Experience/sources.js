@@ -1,4 +1,4 @@
-const url = (file) => `${import.meta.env.BASE_URL}${file}`
+const url = (file) => `${ import.meta.env.BASE_URL }${ file }`
 
 export default {
     font: url('bebas-neue-v9-latin-regular.woff'),

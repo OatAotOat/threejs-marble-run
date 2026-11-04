@@ -9,8 +9,7 @@ const directions = {
     rightward: [ 1, 0 ],
 }
 
-function Key({ active, large = false, onPress, onRelease })
-{
+function Key({ active, large = false, onPress, onRelease }) {
     return <div
         className={ `key ${ large ? 'large' : '' } ${ active ? 'active' : '' }` }
         onMouseDown={ onPress }
@@ -19,8 +18,7 @@ function Key({ active, large = false, onPress, onRelease })
     />
 }
 
-export default function DesktopControls()
-{
+export default function DesktopControls() {
     const forward = useKeyboardControls((state) => state.forward)
     const backward = useKeyboardControls((state) => state.backward)
     const leftward = useKeyboardControls((state) => state.leftward)
@@ -33,14 +31,12 @@ export default function DesktopControls()
 
     const [ heldDirection, setHeldDirection ] = useState(null)
 
-    const pressDirection = (direction) =>
-    {
+    const pressDirection = (direction) => {
         setHeldDirection(direction)
         setJoystick(...directions[direction])
     }
 
-    const releaseDirection = (direction) =>
-    {
+    const releaseDirection = (direction) => {
         if (heldDirection !== direction) { return }
 
         setHeldDirection(null)

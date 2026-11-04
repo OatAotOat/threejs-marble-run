@@ -9,9 +9,8 @@ import useQuality from '../../stores/useQuality.jsx'
 import useSound from '../../stores/useSound.jsx'
 import sources from '../sources.js'
 
-const playSound = (sound, volume = 1) =>
-{
-    if(useSound.getState().muted)
+const playSound = (sound, volume = 1) => {
+    if (useSound.getState().muted)
         return
 
     sound.currentTime = 0
@@ -47,8 +46,7 @@ const shakeOffset = 0.15
 const shakeRoll = 0.06
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export default function Player()
-{
+export default function Player() {
     const body = useRef()
     const [ subscribeKeys, getKeys ] = useKeyboardControls()
     const { rapier, world } = useRapier()
@@ -74,8 +72,7 @@ export default function Player()
     const lastImpactTime = useRef(0)
     const cameraTrauma = useRef(0)
 
-    const jump = () =>
-    {
+    const jump = () => {
         if (useGame.getState().phase === 'paused') { return }
 
         const origin = body.current.translation()
@@ -84,16 +81,14 @@ export default function Player()
         const ray = new rapier.Ray(origin, direction)
         const hit = world.castRay(ray, 10, true)
 
-        if (hit.timeOfImpact < 0.15)
-        {
-            body.current.applyImpulse({ x: 0, y: 0.5, z: 0 });
+        if (hit.timeOfImpact < 0.15) {
+            body.current.applyImpulse({ x: 0, y: 0.5, z: 0 })
 
             playSound(jumpSound, Math.min(1, 2 / (smoothedCameraPosition.distanceTo(smoothedCameraTarget))))
         }
     }
 
-    const handleCollision = ({ manifold, other }) =>
-    {
+    const handleCollision = ({ manifold, other }) => {
         const normal = manifold.normal()
         const otherVelocity = other.rigidBody?.linvel() ?? { x: 0, y: 0, z: 0 }
 
@@ -117,21 +112,18 @@ export default function Player()
             cameraTrauma.current = Math.min(1, cameraTrauma.current + 0.5 + (impact - shakeThreshold) * 0.15)
         }
     }
-    
-    const reset = () =>
-    {
+
+    const reset = () => {
         body.current.setTranslation({ x: 0, y: 1, z: 0 })
         body.current.setLinvel({ x: 0, y: 0, z: 0 })
         body.current.setAngvel({ x: 0, y: 0, z: 0 })
     }
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         const unsubscribeReset = useGame.subscribe(
             (state) => state.phase,
-            (value) =>
-            {
-                if (value === 'ready') { setTimeout(() => { reset() }, 0);}
+            (value) => {
+                if (value === 'ready') { setTimeout(() => { reset() }, 0)}
 
                 if (value === 'falling') { playSound(fallSound) }
 
@@ -151,17 +143,17 @@ export default function Player()
 
         const unsubscribeAny = subscribeKeys(() => { start() })
 
-        return () =>
-        {
+        return () => {
             unsubscribeReset()
             unsubscribeJump()
             unsubscribePlayerJump()
             unsubscribeAny()
         }
+    // Subscribe once, re-subscribing every render would be wasteful (jump is recreated each render)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    useFrame((state, delta) =>
-    {
+    useFrame((state, delta) => {
         const keyboardControls = getKeys()
         const { joystickX, joystickY, playerJump } = usePlayer.getState()
         const { blocksCount, phase } = useGame.getState()
@@ -196,7 +188,7 @@ export default function Player()
          * Camera
          */
         const bodyPosition = body.current.translation()
-    
+
         cameraPosition.copy(bodyPosition)
         cameraPosition.z += 2.25
         cameraPosition.y += 0.65
@@ -212,8 +204,7 @@ export default function Player()
         state.camera.position.copy(smoothedCameraPosition)
         state.camera.lookAt(smoothedCameraTarget)
 
-        if (cameraTrauma.current > 0)
-        {
+        if (cameraTrauma.current > 0) {
             const shake = cameraTrauma.current * cameraTrauma.current
             const time = state.clock.elapsedTime * 35
 
@@ -229,10 +220,8 @@ export default function Player()
         */
         if (bodyPosition.z < - (blocksCount * 4 + 2) && bodyPosition.y > 0) { end() }
 
-        if (bodyPosition.y < - 4)
-        {
-            if (phase === 'playing') { fall() } 
-            else if (phase === 'ended') { restart() }
+        if (bodyPosition.y < - 4) {
+            if (phase === 'playing') { fall() } else if (phase === 'ended') { restart() }
         }
     })
 
@@ -241,7 +230,7 @@ export default function Player()
         canSleep={ false }
         colliders="ball"
         restitution={ 0.2 }
-        friction={ 1 } 
+        friction={ 1 }
         linearDamping={ 0.5 }
         angularDamping={ 0.5 }
         position={ [ 0, 1, 0 ] }

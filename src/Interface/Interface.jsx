@@ -11,25 +11,19 @@ import useQuality from '../stores/useQuality.jsx'
 const isTouch = isMobileDevice()
 const canTilt = supportsTilt()
 
-const toggleTilt = async () =>
-{
+const toggleTilt = async () => {
     const { tiltEnabled, setTiltEnabled } = usePlayer.getState()
 
-    if (tiltEnabled)
-    {
+    if (tiltEnabled) {
         setTiltEnabled(false)
         return
     }
 
-    if (typeof DeviceOrientationEvent.requestPermission === 'function')
-    {
-        try
-        {
-            if(await DeviceOrientationEvent.requestPermission() !== 'granted')
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            if (await DeviceOrientationEvent.requestPermission() !== 'granted')
                 return
-        }
-        catch
-        {
+        } catch {
             return
         }
     }
@@ -39,16 +33,14 @@ const toggleTilt = async () =>
 
 const pad = (value, length) => String(value).padStart(length, '0')
 
-const formatTime = (milliseconds) =>
-{
+const formatTime = (milliseconds) => {
     const minutes = Math.floor(milliseconds / 60000)
     const seconds = Math.floor(milliseconds / 1000) % 60
 
     return `${ pad(minutes, 2) } : ${ pad(seconds, 2) } : ${ pad(Math.floor(milliseconds % 1000), 3) }`
 }
 
-export default function Interface()
-{
+export default function Interface() {
     const time = useRef()
 
     const restart = useGame((state) => state.restart)
@@ -66,10 +58,8 @@ export default function Interface()
     const cycleQualityMode = useQuality((state) => state.cycleMode)
     const tiltEnabled = usePlayer((state) => state.tiltEnabled)
 
-    useEffect(() =>
-    {
-        const unsubscribeEffect = addEffect(() =>
-        {
+    useEffect(() => {
+        const unsubscribeEffect = addEffect(() => {
             const state = useGame.getState()
 
             let elapsedTime = 0
@@ -88,10 +78,8 @@ export default function Interface()
         return () => { unsubscribeEffect() }
     }, [])
 
-    useEffect(() =>
-    {
-        const handleKeyDown = (event) =>
-        {
+    useEffect(() => {
+        const handleKeyDown = (event) => {
             if (event.repeat) { return }
 
             const { phase, restart, togglePause } = useGame.getState()
@@ -103,16 +91,14 @@ export default function Interface()
             if (event.code === 'KeyM') { useSound.getState().toggleMuted() }
         }
 
-        const handleVisibilityChange = () =>
-        {
+        const handleVisibilityChange = () => {
             if (document.hidden) { useGame.getState().pause() }
         }
 
         window.addEventListener('keydown', handleKeyDown)
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
-        return () =>
-        {
+        return () => {
             window.removeEventListener('keydown', handleKeyDown)
             document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
@@ -121,35 +107,35 @@ export default function Interface()
     return (
         <div className="interface">
 
-            {/* Controls */}
+            { /* Controls */ }
             { isTouch ? <TouchControls /> : <DesktopControls /> }
 
-            {/* Time */}
+            { /* Time */ }
             <div className="time">
                 <span ref={ time }>00 : 00 : 000</span>
                 { bestTime !== undefined && <div className="best">Best { formatTime(bestTime) }</div> }
             </div>
 
-            {/* Start */}
+            { /* Start */ }
             <div className={ `start-overlay ${ loaded && phase === 'ready' && !hasStarted ? 'visible' : '' }` }>
                 <div className="title">{ isTouch ? 'Move To Start' : 'Press Any Key To Start' }</div>
             </div>
 
-            {/* Fall */}
+            { /* Fall */ }
             <div className={ `fall ${ phase === 'falling' ? 'visible' : '' }` }>Fell!</div>
 
-            {/* Restart */}
+            { /* Restart */ }
             { phase === 'ended' && newRecord && <div className="new-record">New Record!</div> }
             { phase === 'ended' && <div className="restart" onClick={ restart }>Next Level</div> }
 
-            {/* Settings */}
+            { /* Settings */ }
             <div className="settings">
                 <button className="setting-button" onClick={ toggleMuted }>{ muted ? '🔇' : '🔊' }</button>
                 <button className="setting-button text" onClick={ cycleQualityMode }>{ qualityMode }</button>
                 { canTilt && <button className={ `setting-button text ${ tiltEnabled ? 'active' : '' }` } onClick={ toggleTilt }>Tilt</button> }
             </div>
 
-            {/* Pause */}
+            { /* Pause */ }
             { phase === 'playing' && <button className="pause-button" onClick={ togglePause }>II</button> }
 
             { phase === 'paused' && <div className="pause-menu">
@@ -158,12 +144,12 @@ export default function Interface()
                 <button className="menu-button" onClick={ restart }>Restart</button>
             </div> }
 
-            {/* Loading */}
+            { /* Loading */ }
             <div className={ `loader ${ loaded ? 'hidden' : '' }` }>
                 <div>Loading</div>
                 <div className="loader-bar" />
             </div>
 
         </div>
-    );
+    )
 }

@@ -1,12 +1,10 @@
 import { useRef } from 'react'
 import { Obstacle, ObstacleBox, useBlockAnimation, setNextTranslation } from './Shared.jsx'
 
-export function BlockPlatform({ position = [ 0, 0, 0 ] })
-{
+export function BlockPlatform({ position = [ 0, 0, 0 ] }) {
     const obstacle = useRef()
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         const x = Math.sin(time)
         setNextTranslation(obstacle.current, position[0] + x, position[1], position[2])
     })
@@ -18,13 +16,11 @@ export function BlockPlatform({ position = [ 0, 0, 0 ] })
     </group>
 }
 
-export function BlockPlatform2({ position = [ 0, 0, 0 ] })
-{
+export function BlockPlatform2({ position = [ 0, 0, 0 ] }) {
     const obstacle1 = useRef()
     const obstacle2 = useRef()
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         const x = Math.sin(time)
         setNextTranslation(obstacle1.current, position[0] + x, position[1], position[2])
         setNextTranslation(obstacle2.current, position[0] - x, position[1], position[2])
@@ -40,12 +36,10 @@ export function BlockPlatform2({ position = [ 0, 0, 0 ] })
     </group>
 }
 
-export function BlockPlatform3({ position = [ 0, 0, 0 ] })
-{
+export function BlockPlatform3({ position = [ 0, 0, 0 ] }) {
     const obstacle = useRef()
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         const x = Math.cos(time)
         const z = Math.sin(time)
         setNextTranslation(obstacle.current, position[0] + x, position[1], position[2] + z)

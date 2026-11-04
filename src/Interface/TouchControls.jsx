@@ -5,16 +5,14 @@ import GyroControls from './GyroControls.jsx'
 const stickRadius = 45
 const deadZone = 0.1
 
-function Joystick()
-{
+function Joystick() {
     const setJoystick = usePlayer((state) => state.setJoystick)
 
     const [ origin, setOrigin ] = useState(null)
     const knob = useRef()
     const activePointer = useRef(null)
 
-    const handleStickDown = (event) =>
-    {
+    const handleStickDown = (event) => {
         if (activePointer.current !== null) { return }
 
         activePointer.current = event.pointerId
@@ -22,8 +20,7 @@ function Joystick()
         setOrigin({ x: event.clientX, y: event.clientY })
     }
 
-    const handleStickMove = (event) =>
-    {
+    const handleStickMove = (event) => {
         if (event.pointerId !== activePointer.current || !origin) { return }
 
         let x = event.clientX - origin.x
@@ -31,20 +28,17 @@ function Joystick()
 
         const distance = Math.hypot(x, y)
 
-        if (distance > stickRadius)
-        {
+        if (distance > stickRadius) {
             x *= stickRadius / distance
             y *= stickRadius / distance
         }
 
         knob.current.style.transform = `translate(${ x }px, ${ y }px)`
 
-        if (distance / stickRadius < deadZone) { setJoystick(0, 0) }
-        else { setJoystick(x / stickRadius, y / stickRadius) }
+        if (distance / stickRadius < deadZone) { setJoystick(0, 0) } else { setJoystick(x / stickRadius, y / stickRadius) }
     }
 
-    const handleStickEnd = (event) =>
-    {
+    const handleStickEnd = (event) => {
         if (event.pointerId !== activePointer.current) { return }
 
         activePointer.current = null
@@ -69,20 +63,17 @@ function Joystick()
     </div>
 }
 
-export default function TouchControls()
-{
+export default function TouchControls() {
     const setPlayerJump = usePlayer((state) => state.setPlayerJump)
     const playerJump = usePlayer((state) => state.playerJump)
     const tiltEnabled = usePlayer((state) => state.tiltEnabled)
 
-    const handleJumpDown = (event) =>
-    {
+    const handleJumpDown = (event) => {
         event.currentTarget.setPointerCapture(event.pointerId)
         setPlayerJump(true)
     }
 
-    const handleJumpEnd = () =>
-    {
+    const handleJumpEnd = () => {
         setPlayerJump(false)
     }
 

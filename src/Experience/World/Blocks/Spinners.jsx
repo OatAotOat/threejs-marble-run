@@ -1,13 +1,11 @@
 import { useState, useRef } from 'react'
 import { BlockFloor, Obstacle, ObstacleBox, useBlockAnimation, setNextRotation } from './Shared.jsx'
 
-export function BlockSpinner({ position = [ 0, 0, 0 ] })
-{
+export function BlockSpinner({ position = [ 0, 0, 0 ] }) {
     const obstacle = useRef()
     const [ speed ] = useState(() => (Math.random() + 0.2) * (Math.random() < 0.5 ? - 1 : 1))
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         setNextRotation(obstacle.current, 0, time * speed, 0)
     })
 
@@ -19,13 +17,11 @@ export function BlockSpinner({ position = [ 0, 0, 0 ] })
     </group>
 }
 
-export function BlockSpinner2({ position = [ 0, 0, 0 ] })
-{
+export function BlockSpinner2({ position = [ 0, 0, 0 ] }) {
     const obstacle = useRef()
     const [ speed ] = useState(() => (Math.random() + 0.2) * (Math.random() < 0.5 ? - 1 : 1))
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         setNextRotation(obstacle.current, 0, 0, time * speed)
     })
 

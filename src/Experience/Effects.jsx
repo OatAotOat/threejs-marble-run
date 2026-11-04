@@ -2,8 +2,7 @@ import { Vignette, Bloom, EffectComposer, ToneMapping, ChromaticAberration } fro
 import { BlendFunction, ToneMappingMode } from 'postprocessing'
 import useQuality from '../stores/useQuality.jsx'
 
-export default function Effects()
-{
+export default function Effects() {
     const highQuality = useQuality((state) => state.quality === 'high')
 
     return <EffectComposer multisampling={ 0 }>

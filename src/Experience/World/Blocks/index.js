@@ -5,15 +5,15 @@ import { BlockStairs1, BlockStairs2 } from './Stairs.jsx'
 
 export { BlockStart, BlockEnd } from './StartEnd.jsx'
 
-export const obstacleTypes = [ 
-    BlockSpinner, 
-    BlockSpinner2, 
-    BlockAxe, 
-    BlockLimbo, 
-    BlockStrip, 
-    BlockPlatform, 
-    BlockPlatform2, 
-    BlockPlatform3, 
-    BlockStairs1, 
-    BlockStairs2 
+export const obstacleTypes = [
+    BlockSpinner,
+    BlockSpinner2,
+    BlockAxe,
+    BlockLimbo,
+    BlockStrip,
+    BlockPlatform,
+    BlockPlatform2,
+    BlockPlatform3,
+    BlockStairs1,
+    BlockStairs2
 ]

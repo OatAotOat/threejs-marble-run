@@ -1,8 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 
-export default create(subscribeWithSelector((set) =>
-{
+export default create(subscribeWithSelector((set) => {
     return {
         joystickX: 0,
         joystickY: 0,
@@ -13,4 +12,4 @@ export default create(subscribeWithSelector((set) =>
         setPlayerJump: (value) => set(() => ({ playerJump: value }) ),
         setTiltEnabled: (value) => set(() => ({ tiltEnabled: value })),
     }
-}));
+}))

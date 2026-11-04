@@ -4,8 +4,7 @@ import Environment from './Environment.jsx'
 import { Level } from './Level.jsx'
 import Player from './Player.jsx'
 
-export default function World({ debug = false })
-{
+export default function World({ debug = false }) {
     const blocksCount = useGame((state) => state.blocksCount)
     const blocksSeed = useGame((state) => state.blocksSeed)
     const level = useGame((state) => state.level)

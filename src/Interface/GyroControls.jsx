@@ -6,12 +6,10 @@ const deadZoneAngle = 2
 
 const wrapAngle = (angle) => ((angle + 540) % 360) - 180
 
-const toScreenTilt = (beta, gamma) =>
-{
+const toScreenTilt = (beta, gamma) => {
     const angle = screen.orientation?.angle ?? window.orientation ?? 0
 
-    switch((angle + 360) % 360)
-    {
+    switch ((angle + 360) % 360) {
         case 90:
             return { x: beta, y: - gamma }
         case 180:
@@ -23,16 +21,13 @@ const toScreenTilt = (beta, gamma) =>
     }
 }
 
-export default function GyroControls()
-{
+export default function GyroControls() {
     const setJoystick = usePlayer((state) => state.setJoystick)
 
-    useEffect(() =>
-    {
+    useEffect(() => {
         let neutral = null
 
-        const handleOrientation = (event) =>
-        {
+        const handleOrientation = (event) => {
             if (event.beta === null || event.gamma === null) { return }
 
             const tilt = toScreenTilt(event.beta, event.gamma)
@@ -44,14 +39,12 @@ export default function GyroControls()
 
             const length = Math.hypot(x, y)
 
-            if (length * fullTiltAngle < deadZoneAngle)
-            {
+            if (length * fullTiltAngle < deadZoneAngle) {
                 setJoystick(0, 0)
                 return
             }
 
-            if (length > 1)
-            {
+            if (length > 1) {
                 x /= length
                 y /= length
             }
@@ -64,13 +57,12 @@ export default function GyroControls()
         window.addEventListener('deviceorientation', handleOrientation)
         window.addEventListener('orientationchange', handleRotation)
 
-        return () =>
-        {
+        return () => {
             window.removeEventListener('deviceorientation', handleOrientation)
             window.removeEventListener('orientationchange', handleRotation)
             setJoystick(0, 0)
         }
-    }, [])
+    }, [ setJoystick ])
 
     return null
 }

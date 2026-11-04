@@ -1,15 +1,13 @@
 import { useRef } from 'react'
 import { BlockFloor, Obstacle, ObstacleBox, useBlockAnimation, setNextTranslation } from './Shared.jsx'
 
-export function BlockStairs1({ position = [ 0, 0, 0 ] })
-{
+export function BlockStairs1({ position = [ 0, 0, 0 ] }) {
     const obstacle1 = useRef()
     const obstacle2 = useRef()
     const obstacle3 = useRef()
     const obstacle4 = useRef()
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         const y = Math.sin(time) + 1.15
         setNextTranslation(obstacle1.current, position[0], position[1] - y, position[2])
         setNextTranslation(obstacle2.current, position[0], position[1] + y / 2, position[2])
@@ -37,13 +35,11 @@ export function BlockStairs1({ position = [ 0, 0, 0 ] })
     </group>
 }
 
-export function BlockStairs2({ position = [ 0, 0, 0 ] })
-{
+export function BlockStairs2({ position = [ 0, 0, 0 ] }) {
     const obstacle1 = useRef()
     const obstacle2 = useRef()
 
-    useBlockAnimation((time) =>
-    {
+    useBlockAnimation((time) => {
         const y = Math.sin(time) + 1.15
         setNextTranslation(obstacle1.current, position[0], position[1] - y, position[2])
         setNextTranslation(obstacle2.current, position[0], position[1] + y / 2, position[2])

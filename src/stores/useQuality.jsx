@@ -5,27 +5,19 @@ import { isMobileDevice } from '../Utils/device.js'
 const modes = [ 'auto', 'high', 'low' ]
 const modeKey = 'marble-run-quality'
 
-const loadMode = () =>
-{
-    try
-    {
+const loadMode = () => {
+    try {
         const mode = localStorage.getItem(modeKey)
         return modes.includes(mode) ? mode : 'auto'
-    }
-    catch
-    {
+    } catch {
         return 'auto'
     }
 }
 
-const saveMode = (mode) =>
-{
-    try
-    {
+const saveMode = (mode) => {
+    try {
         localStorage.setItem(modeKey, mode)
-    }
-    catch
-    {
+    } catch {
         // Preference then only lasts for the session
     }
 }
@@ -33,8 +25,7 @@ const saveMode = (mode) =>
 const forcedQuality = new URLSearchParams(window.location.search).get('quality')
 const initialMode = [ 'high', 'low' ].includes(forcedQuality) ? forcedQuality : loadMode()
 
-export default create(subscribeWithSelector((set) =>
-{
+export default create(subscribeWithSelector((set) => {
     return {
         mode: initialMode,
         quality: initialMode === 'auto' ? (isMobileDevice() ? 'low' : 'high') : initialMode,
@@ -42,8 +33,7 @@ export default create(subscribeWithSelector((set) =>
 
         setQuality: (quality) => set(() => ({ quality })),
 
-        cycleMode: () => set((state) =>
-        {
+        cycleMode: () => set((state) => {
             const mode = modes[(modes.indexOf(state.mode) + 1) % modes.length]
             saveMode(mode)
 
