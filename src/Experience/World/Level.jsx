@@ -2,26 +2,31 @@ import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { useMemo } from 'react'
 import { BlockStart, BlockEnd, obstacleTypes } from './Blocks/index.js'
 import { boxGeometry, wallMaterial } from './Blocks/Shared.jsx'
+import { blockLength, getBlockZ } from './layout.js'
 
 function Bounds({ length = 1 }) {
+    const trackLength = length * blockLength
+    const centerZ = getBlockZ(0) + blockLength / 2 - trackLength / 2
+    const backZ = getBlockZ(0) + blockLength / 2 - trackLength
+
     return <>
         <RigidBody type="fixed" restitution={ 0.2 } friction={ 0 }>
             <mesh
-                position={ [ 2.15, 1, - (length * 2) + 2 ] }
+                position={ [ 2.15, 1, centerZ ] }
                 geometry={ boxGeometry }
                 material={ wallMaterial }
-                scale={ [ 0.3, 2, 4 * length ] }
+                scale={ [ 0.3, 2, trackLength ] }
                 castShadow
             />
             <mesh
-                position={ [ - 2.15, 1, - (length * 2) + 2 ] }
+                position={ [ - 2.15, 1, centerZ ] }
                 geometry={ boxGeometry }
                 material={ wallMaterial }
-                scale={ [ 0.3, 2, 4 * length ] }
+                scale={ [ 0.3, 2, trackLength ] }
                 receiveShadow
             />
             <mesh
-                position={ [ 0, 1, - (length * 4) + 2 ] }
+                position={ [ 0, 1, backZ ] }
                 geometry={ boxGeometry }
                 material={ wallMaterial }
                 scale={ [ 4, 2, 0.3 ] }
@@ -29,20 +34,20 @@ function Bounds({ length = 1 }) {
             />
             { /* Invisible Walls */ }
             <CuboidCollider
-                args={ [ 0.15, 1.5, 2 * length ] }
-                position={ [ 2.15, 3.5, - (length * 2) + 2 ] }
+                args={ [ 0.15, 1.5, trackLength / 2 ] }
+                position={ [ 2.15, 3.5, centerZ ] }
                 restitution={ 0.2 }
                 friction={ 0 }
             />
             <CuboidCollider
-                args={ [ 0.15, 1.5, 2 * length ] }
-                position={ [ - 2.15, 3.5, - (length * 2) + 2 ] }
+                args={ [ 0.15, 1.5, trackLength / 2 ] }
+                position={ [ - 2.15, 3.5, centerZ ] }
                 restitution={ 0.2 }
                 friction={ 0 }
             />
             <CuboidCollider
                 args={ [ 2, 1.5, 0.15 ] }
-                position={ [ 0, 3.5, - (length * 4) + 2 ] }
+                position={ [ 0, 3.5, backZ ] }
                 restitution={ 0.2 }
                 friction={ 0 }
             />
@@ -72,16 +77,14 @@ export function Level({
         }
 
         return blocks
-    // seed and level are intentional: changing either re-rolls the random blocks
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ count, types, seed, level ])
 
     return <>
-        <BlockStart position={ [ 0, 0, 0 ] } level={ level } />
+        <BlockStart position={ [ 0, 0, getBlockZ(0) ] } level={ level } />
 
-        { blocks.map((Block, index) => <Block key={ index } position={ [ 0, 0, - (index + 1) * 4 ] } />) }
+        { blocks.map((Block, index) => <Block key={ index } position={ [ 0, 0, getBlockZ(index + 1) ] } />) }
 
-        <BlockEnd position={ [ 0, 0, - (count + 1) * 4 ] } level={ level } key={ level } />
+        <BlockEnd position={ [ 0, 0, getBlockZ(count + 1) ] } level={ level } key={ level } />
 
         <Bounds length={ count + 2 } />
     </>

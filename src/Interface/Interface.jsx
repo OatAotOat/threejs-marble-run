@@ -1,7 +1,8 @@
-import useGame from '../stores/useGame.jsx'
+import useGame, { phases } from '../stores/useGame.jsx'
 import usePlayer from '../stores/usePlayer.jsx'
 import { useEffect, useRef } from 'react'
 import { addEffect } from '@react-three/fiber'
+import { useKeyboardControls } from '@react-three/drei'
 import DesktopControls from './DesktopControls.jsx'
 import TouchControls from './TouchControls.jsx'
 import { isMobileDevice, supportsTilt } from '../Utils/device.js'
@@ -58,17 +59,19 @@ export default function Interface() {
     const cycleQualityMode = useQuality((state) => state.cycleMode)
     const tiltEnabled = usePlayer((state) => state.tiltEnabled)
 
+    const [ subscribeKeys ] = useKeyboardControls()
+
     useEffect(() => {
         const unsubscribeEffect = addEffect(() => {
             const state = useGame.getState()
 
             let elapsedTime = 0
 
-            if (state.phase === 'playing') {
+            if (state.phase === phases.playing) {
                 elapsedTime = Date.now() - state.startTime
-            } else if (state.phase === 'paused') {
+            } else if (state.phase === phases.paused) {
                 elapsedTime = state.pausedAt - state.startTime
-            } else if (state.phase === 'ended' || state.phase === 'falling') {
+            } else if (state.phase === phases.ended || state.phase === phases.falling) {
                 elapsedTime = state.endTime - state.startTime
             }
 
@@ -79,30 +82,28 @@ export default function Interface() {
     }, [])
 
     useEffect(() => {
-        const handleKeyDown = (event) => {
-            if (event.repeat) { return }
+        const onPress = (action) => (pressed) => { if (pressed) { action() } }
 
-            const { phase, restart, togglePause } = useGame.getState()
-
-            if (event.code === 'KeyR' && phase !== 'ended') { restart() }
-
-            if (event.code === 'Escape' || event.code === 'KeyP') { togglePause() }
-
-            if (event.code === 'KeyM') { useSound.getState().toggleMuted() }
-        }
+        const unsubscribeKeys = [
+            subscribeKeys((state) => state.restart, onPress(() => {
+                const { phase, restart } = useGame.getState()
+                if (phase !== phases.ended) { restart() }
+            })),
+            subscribeKeys((state) => state.pause, onPress(() => useGame.getState().togglePause())),
+            subscribeKeys((state) => state.mute, onPress(() => useSound.getState().toggleMuted())),
+        ]
 
         const handleVisibilityChange = () => {
             if (document.hidden) { useGame.getState().pause() }
         }
 
-        window.addEventListener('keydown', handleKeyDown)
         document.addEventListener('visibilitychange', handleVisibilityChange)
 
         return () => {
-            window.removeEventListener('keydown', handleKeyDown)
+            unsubscribeKeys.forEach((unsubscribe) => unsubscribe())
             document.removeEventListener('visibilitychange', handleVisibilityChange)
         }
-    }, [])
+    }, [ subscribeKeys ])
 
     return (
         <div className="interface">
@@ -117,16 +118,16 @@ export default function Interface() {
             </div>
 
             { /* Start */ }
-            <div className={ `start-overlay ${ loaded && phase === 'ready' && !hasStarted ? 'visible' : '' }` }>
+            <div className={ `start-overlay ${ loaded && phase === phases.ready && !hasStarted ? 'visible' : '' }` }>
                 <div className="title">{ isTouch ? 'Move To Start' : 'Press Any Key To Start' }</div>
             </div>
 
             { /* Fall */ }
-            <div className={ `fall ${ phase === 'falling' ? 'visible' : '' }` }>Fell!</div>
+            <div className={ `fall ${ phase === phases.falling ? 'visible' : '' }` }>Fell!</div>
 
             { /* Restart */ }
-            { phase === 'ended' && newRecord && <div className="new-record">New Record!</div> }
-            { phase === 'ended' && <div className="restart" onClick={ restart }>Next Level</div> }
+            { phase === phases.ended && newRecord && <div className="new-record">New Record!</div> }
+            { phase === phases.ended && <div className="restart" onClick={ restart }>Next Level</div> }
 
             { /* Settings */ }
             <div className="settings">
@@ -136,9 +137,9 @@ export default function Interface() {
             </div>
 
             { /* Pause */ }
-            { phase === 'playing' && <button className="pause-button" onClick={ togglePause }>II</button> }
+            { phase === phases.playing && <button className="pause-button" onClick={ togglePause }>II</button> }
 
-            { phase === 'paused' && <div className="pause-menu">
+            { phase === phases.paused && <div className="pause-menu">
                 <div className="title">Paused</div>
                 <button className="menu-button" onClick={ resume }>Resume</button>
                 <button className="menu-button" onClick={ restart }>Restart</button>

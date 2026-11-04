@@ -5,6 +5,7 @@ import { lazy, Suspense } from 'react'
 import { KeyboardControls } from '@react-three/drei'
 import Interface from './Interface/Interface.jsx'
 import { getCameraFov } from './Utils/device.js'
+import { keyboardMap } from './Utils/controls.js'
 
 const Experience = lazy(() => import('./Experience/Experience.jsx'))
 
@@ -23,15 +24,7 @@ document.addEventListener('contextmenu', preventDrag)
 const root = ReactDOM.createRoot(document.querySelector('#root'))
 
 root.render(
-    <KeyboardControls
-        map={ [
-            { name: 'forward', keys: [ 'ArrowUp', 'KeyW' ] },
-            { name: 'backward', keys: [ 'ArrowDown', 'KeyS' ] },
-            { name: 'leftward', keys: [ 'ArrowLeft', 'KeyA' ] },
-            { name: 'rightward', keys: [ 'ArrowRight', 'KeyD' ] },
-            { name: 'jump', keys: [ 'Space' ] },
-        ] }
-    >
+    <KeyboardControls map={ keyboardMap }>
         <Canvas
             shadows
             dpr={ [ 1, 1.5 ] }

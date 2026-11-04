@@ -1,25 +1,12 @@
 import { create } from 'zustand'
-
-const mutedKey = 'marble-run-muted'
-
-const loadMuted = () => {
-    try {
-        return localStorage.getItem(mutedKey) === 'true'
-    } catch {
-        return false
-    }
-}
+import { readStorage, writeStorage, storageKeys } from '../Utils/storage.js'
 
 export default create((set) => {
     return {
-        muted: loadMuted(),
+        muted: readStorage(storageKeys.muted) === 'true',
 
         toggleMuted: () => set((state) => {
-            try {
-                localStorage.setItem(mutedKey, String(!state.muted))
-            } catch {
-                // Preference then only lasts for the session
-            }
+            writeStorage(storageKeys.muted, String(!state.muted))
 
             return { muted: !state.muted }
         }),

@@ -1,25 +1,13 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { isMobileDevice } from '../Utils/device.js'
+import { readStorage, writeStorage, storageKeys } from '../Utils/storage.js'
 
 const modes = [ 'auto', 'high', 'low' ]
-const modeKey = 'marble-run-quality'
 
 const loadMode = () => {
-    try {
-        const mode = localStorage.getItem(modeKey)
-        return modes.includes(mode) ? mode : 'auto'
-    } catch {
-        return 'auto'
-    }
-}
-
-const saveMode = (mode) => {
-    try {
-        localStorage.setItem(modeKey, mode)
-    } catch {
-        // Preference then only lasts for the session
-    }
+    const mode = readStorage(storageKeys.quality)
+    return modes.includes(mode) ? mode : 'auto'
 }
 
 const forcedQuality = new URLSearchParams(window.location.search).get('quality')
@@ -35,7 +23,7 @@ export default create(subscribeWithSelector((set) => {
 
         cycleMode: () => set((state) => {
             const mode = modes[(modes.indexOf(state.mode) + 1) % modes.length]
-            saveMode(mode)
+            writeStorage(storageKeys.quality, mode)
 
             return {
                 mode,

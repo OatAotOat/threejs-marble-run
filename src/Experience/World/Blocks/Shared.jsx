@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import { RigidBody } from '@react-three/rapier'
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
-import useGame from '../../../stores/useGame.jsx'
+import useGame, { phases } from '../../../stores/useGame.jsx'
 
 export const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -35,13 +35,13 @@ export const setNextTranslation = (body, x, y, z) => {
 }
 
 /**
- * Block building pieces
+ * Block Building Pieces
  */
 export function useBlockAnimation(animate) {
     const time = useRef(Math.random() * Math.PI * 2)
 
     useFrame((_, delta) => {
-        if (useGame.getState().phase === 'paused')
+        if (useGame.getState().phase === phases.paused)
             return
 
         time.current += delta

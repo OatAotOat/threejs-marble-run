@@ -1,6 +1,14 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
-import { loadBestTimes, saveBestTimes } from '../Utils/bestTimes.js'
+import { readJson, writeJson, storageKeys } from '../Utils/storage.js'
+
+export const phases = Object.freeze({
+    ready: 'ready',
+    playing: 'playing',
+    paused: 'paused',
+    falling: 'falling',
+    ended: 'ended',
+})
 
 export default create(subscribeWithSelector((set, get) => {
     return {
@@ -16,22 +24,22 @@ export default create(subscribeWithSelector((set, get) => {
         startTime: 0,
         endTime: 0,
         pausedAt: 0,
-        bestTimes: loadBestTimes(),
+        bestTimes: readJson(storageKeys.bestTimes, {}),
         newRecord: false,
 
         /**
          * Phases
          */
-        phase: 'ready',
+        phase: phases.ready,
         hasStarted: false,
 
         setLoaded: () => set(() => ({ loaded: true })),
 
         start: () => {
             set((state) => {
-                if (state.phase === 'ready') {
+                if (state.phase === phases.ready) {
                     return {
-                        phase: 'playing',
+                        phase: phases.playing,
                         startTime: Date.now(),
                         hasStarted: true
                     }
@@ -43,54 +51,53 @@ export default create(subscribeWithSelector((set, get) => {
 
         restart: () => {
             set((state) => {
+                if (state.phase === phases.ready) { return state } // Same object, So No Listeners Are Notified
+
                 const nextState = {
-                    phase: 'ready',
+                    phase: phases.ready,
                     blocksSeed: Math.random(),
                     newRecord: false
                 }
 
-                if (state.phase === 'ended') {
+                if (state.phase === phases.ended) {
                     nextState.blocksCount = state.blocksCount + (state.blocksCount > 10 ? 2 : 1)
                     nextState.level = state.level + 1
                 }
 
-                if ([ 'playing', 'ended', 'paused', 'falling' ].includes(state.phase))
-                    return nextState
-
-                return state // Same object, So No Listeners Are Notified
+                return nextState
             })
         },
 
         end: () => {
             set((state) => {
-                if (state.phase !== 'playing') { return state } // Same object, So No Listeners Are Notified
+                if (state.phase !== phases.playing) { return state } // Same object, So No Listeners Are Notified
 
                 const endTime = Date.now()
                 const time = endTime - state.startTime
                 const bestTime = state.bestTimes[state.level]
 
-                if (bestTime !== undefined && time >= bestTime) { return { phase: 'ended', endTime } }
+                if (bestTime !== undefined && time >= bestTime) { return { phase: phases.ended, endTime } }
 
                 const bestTimes = { ...state.bestTimes, [state.level]: time }
-                saveBestTimes(bestTimes)
+                writeJson(storageKeys.bestTimes, bestTimes)
 
-                return { phase: 'ended', endTime, bestTimes, newRecord: true }
+                return { phase: phases.ended, endTime, bestTimes, newRecord: true }
             })
         },
 
         fall: () => {
-            if (get().phase !== 'playing') { return }
+            if (get().phase !== phases.playing) { return }
 
-            set(() => ({ phase: 'falling', endTime: Date.now() }))
+            set(() => ({ phase: phases.falling, endTime: Date.now() }))
 
             setTimeout(() => {
-                if (get().phase === 'falling') { get().restart() }
+                if (get().phase === phases.falling) { get().restart() }
             }, 1000)
         },
 
         pause: () => {
             set((state) => {
-                if (state.phase === 'playing') { return { phase: 'paused', pausedAt: Date.now() } }
+                if (state.phase === phases.playing) { return { phase: phases.paused, pausedAt: Date.now() } }
 
                 return state // Same object, So No Listeners Are Notified
             })
@@ -98,14 +105,14 @@ export default create(subscribeWithSelector((set, get) => {
 
         resume: () => {
             set((state) => {
-                if (state.phase === 'paused') { return { phase: 'playing', startTime: state.startTime + Date.now() - state.pausedAt } }
+                if (state.phase === phases.paused) { return { phase: phases.playing, startTime: state.startTime + Date.now() - state.pausedAt } }
 
                 return state // Same object, So No Listeners Are Notified
             })
         },
 
         togglePause: () => {
-            if (get().phase === 'paused') { get().resume() } else { get().pause() }
+            if (get().phase === phases.paused) { get().resume() } else { get().pause() }
         },
 
     }
