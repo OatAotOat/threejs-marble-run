@@ -10,6 +10,9 @@ export const phases = Object.freeze({
     ended: 'ended',
 })
 
+const respawnDelay = 800
+let respawnTimeout
+
 export default create(subscribeWithSelector((set, get) => {
     return {
         loaded: false,
@@ -53,6 +56,8 @@ export default create(subscribeWithSelector((set, get) => {
             set((state) => {
                 if (state.phase === phases.ready) { return state } // Same object, So No Listeners Are Notified
 
+                clearTimeout(respawnTimeout)
+
                 const nextState = {
                     phase: phases.ready,
                     blocksSeed: Math.random(),
@@ -90,9 +95,10 @@ export default create(subscribeWithSelector((set, get) => {
 
             set(() => ({ phase: phases.falling, endTime: Date.now() }))
 
-            setTimeout(() => {
+            clearTimeout(respawnTimeout)
+            respawnTimeout = setTimeout(() => {
                 if (get().phase === phases.falling) { get().restart() }
-            }, 1000)
+            }, respawnDelay)
         },
 
         pause: () => {

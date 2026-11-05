@@ -5,13 +5,15 @@ import useGame, { phases } from '../../../stores/useGame.jsx'
 import { prefersReducedMotion } from '../../../Utils/device.js'
 import { marbleRadius } from '../layout.js'
 
-const stiffness = 250
-const damping = 9
-const impactKick = 1.25
+const stiffness = 500
+const damping = 20
+const minSquashImpact = 5
+const impactKick = 3.75
 const maxSquash = 0.5
-const maxStretch = 0.25
+const maxStretch = 0.125
 const pressStart = 5
-const pressFull = 25
+const pressFull = 15
+const minPress = 0.25
 const maxPress = 0.5
 const pressDelay = 0.075
 const reduceMotion = prefersReducedMotion()
@@ -41,7 +43,8 @@ export default function usePlayerSquash() {
         let pressTarget = 0
 
         if (s.pressTime > pressDelay) {
-            pressTarget = THREE.MathUtils.clamp((s.pressForce - pressStart) / (pressFull - pressStart), 0, 1) * maxPress
+            const pressStrength = THREE.MathUtils.clamp((s.pressForce - pressStart) / (pressFull - pressStart), 0, 1)
+            pressTarget = THREE.MathUtils.lerp(minPress, maxPress, pressStrength)
             axis.copy(pressAxis)
             s.anchor = 0
         }
@@ -77,11 +80,11 @@ export default function usePlayerSquash() {
     })
 
     const impact = (strength, direction) => {
-        if (reduceMotion) { return }
+        if (reduceMotion || strength < minSquashImpact) { return }
 
         axis.copy(direction)
         spring.current.anchor = 1
-        spring.current.velocity += strength * impactKick
+        spring.current.velocity += (strength - minSquashImpact) * impactKick
     }
 
     const press = ({ totalForceMagnitude, maxForceDirection }) => {

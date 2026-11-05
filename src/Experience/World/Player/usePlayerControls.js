@@ -41,25 +41,21 @@ export default function usePlayerControls(body, { onJump }) {
             (value) => { if (value) { jump() } }
         )
 
-        const unsubscribeStart = subscribeKeys(
-            (state) => isMovementPressed(state),
-            (value) => { if (value) { start() } }
-        )
-
         return () => {
             unsubscribeJump()
             unsubscribePlayerJump()
-            unsubscribeStart()
         }
-    }, [ body, subscribeKeys, rapier, world, start ])
+    }, [ body, subscribeKeys, rapier, world ])
 
     useFrame((_, delta) => {
-        if (useGame.getState().phase === phases.paused || !body.current) { return }
+        const { phase } = useGame.getState()
+
+        if (phase === phases.paused || !body.current) { return }
 
         const keys = getKeys()
         const { joystickX, joystickY, playerJump } = usePlayer.getState()
 
-        if (joystickX || joystickY || playerJump) { start() }
+        if (phase === phases.ready && (joystickX || joystickY || playerJump || isMovementPressed(keys))) { start() }
 
         let inputX = joystickX
         let inputZ = joystickY
