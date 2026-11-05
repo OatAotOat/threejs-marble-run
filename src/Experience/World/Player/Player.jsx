@@ -1,7 +1,7 @@
 import { RigidBody, BallCollider } from '@react-three/rapier'
 import { useRef } from 'react'
 import * as THREE from 'three'
-import useQuality from '../../../stores/useQuality.jsx'
+import useQuality, { isQualityAtLeast } from '../../../stores/useQuality.jsx'
 import { spawnPosition, marbleRadius } from '../layout.js'
 import usePlayerSounds from './usePlayerSounds.js'
 import useFollowCamera from './useFollowCamera.js'
@@ -34,7 +34,7 @@ const marbleGlossyMaterial = new THREE.MeshPhysicalMaterial({
 
 export default function Player() {
     const body = useRef()
-    const highQuality = useQuality((state) => state.quality === 'high')
+    const highQuality = useQuality((state) => isQualityAtLeast(state.quality, 'high'))
 
     const playSound = usePlayerSounds()
     const camera = useFollowCamera(body)

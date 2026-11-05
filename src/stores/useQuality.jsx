@@ -3,7 +3,11 @@ import { subscribeWithSelector } from 'zustand/middleware'
 import { isMobileDevice } from '../Utils/device.js'
 import { readStorage, writeStorage, storageKeys } from '../Utils/storage.js'
 
-const modes = [ 'auto', 'high', 'low' ]
+const modes = [ 'auto', 'low', 'high', 'ultra' ]
+
+const qualityRank = { low: 0, high: 1, ultra: 2 }
+
+export const isQualityAtLeast = (quality, level) => qualityRank[quality] >= qualityRank[level]
 
 const loadMode = () => {
     const mode = readStorage(storageKeys.quality)
@@ -11,7 +15,9 @@ const loadMode = () => {
 }
 
 const forcedQuality = new URLSearchParams(window.location.search).get('quality')
-const initialMode = [ 'high', 'low' ].includes(forcedQuality) ? forcedQuality : loadMode()
+const initialMode = [ 'ultra', 'high', 'low' ].includes(forcedQuality) ? forcedQuality : loadMode()
+
+const autoQuality = (quality) => quality === 'ultra' ? 'high' : quality
 
 export default create(subscribeWithSelector((set) => {
     return {
@@ -28,7 +34,7 @@ export default create(subscribeWithSelector((set) => {
             return {
                 mode,
                 adaptive: mode === 'auto',
-                quality: mode === 'auto' ? state.quality : mode,
+                quality: mode === 'auto' ? autoQuality(state.quality) : mode,
             }
         }),
     }
