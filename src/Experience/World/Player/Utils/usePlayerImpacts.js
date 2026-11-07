@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import useGame, { phases } from '../../../stores/useGame.jsx'
+import useGame, { phases } from '../../../../stores/useGame.jsx'
 
 const minImpact = 0.6
 const impactCooldown = 150

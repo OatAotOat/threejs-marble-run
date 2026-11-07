@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
-import useGame, { phases } from '../../../stores/useGame.jsx'
-import { prefersReducedMotion } from '../../../Utils/device.js'
-import { marbleRadius } from '../layout.js'
+import useGame, { phases } from '../../../../stores/useGame.jsx'
+import { prefersReducedMotion } from '../../../../Utils/device.js'
+import { marbleRadius } from '../../layout.js'
 
 const stiffness = 500
 const damping = 20

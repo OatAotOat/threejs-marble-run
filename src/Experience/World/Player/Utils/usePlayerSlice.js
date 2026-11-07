@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import * as THREE from 'three'
-import useGame, { phases, fallCauses } from '../../../stores/useGame.jsx'
-import useQuality, { isQualityAtLeast } from '../../../stores/useQuality.jsx'
+import useGame, { phases, fallCauses } from '../../../../stores/useGame.jsx'
+import useQuality, { isQualityAtLeast } from '../../../../stores/useQuality.jsx'
 
 const up = new THREE.Vector3(0, 1, 0)
 

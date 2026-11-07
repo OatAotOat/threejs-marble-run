@@ -2,9 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useKeyboardControls } from '@react-three/drei'
 import { useRapier } from '@react-three/rapier'
-import useGame, { phases } from '../../../stores/useGame.jsx'
-import usePlayer from '../../../stores/usePlayer.jsx'
-import { isMovementPressed } from '../../../Utils/controls.js'
+import useGame, { phases } from '../../../../stores/useGame.jsx'
+import usePlayer from '../../../../stores/usePlayer.jsx'
+import { isMovementPressed } from '../../../../Utils/controls.js'
 
 export default function usePlayerControls(body, { onJump }) {
     const [ subscribeKeys, getKeys ] = useKeyboardControls()

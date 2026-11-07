@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import useGame, { phases, fallCauses } from '../../../stores/useGame.jsx'
-import useSound from '../../../stores/useSound.jsx'
-import sources from '../../sources.js'
+import useGame, { phases, fallCauses } from '../../../../stores/useGame.jsx'
+import useSound from '../../../../stores/useSound.jsx'
+import sources from '../../../sources.js'
 
 const playSound = (sound, volume = 1) => {
     if (useSound.getState().muted) { return }

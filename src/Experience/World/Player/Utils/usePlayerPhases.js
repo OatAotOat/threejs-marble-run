@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
-import useGame, { phases } from '../../../stores/useGame.jsx'
-import { spawnPosition, fallHeight, getFinishZ } from '../layout.js'
+import useGame, { phases } from '../../../../stores/useGame.jsx'
+import { spawnPosition, fallHeight, getFinishZ } from '../../layout.js'
 
 const resetBody = (body) => {
     if (!body) { return }
