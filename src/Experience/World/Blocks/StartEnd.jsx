@@ -1,5 +1,5 @@
 import { RigidBody } from '@react-three/rapier'
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useLayoutEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float, Text, useGLTF, Sparkles } from '@react-three/drei'
 import { isMobileDevice } from '../../../Utils/device.js'
@@ -9,6 +9,22 @@ import sources from '../../sources.js'
 import { BlockFloor, floor1Material, setNextRotation } from './Shared.jsx'
 
 const isTouch = isMobileDevice()
+
+const sparkleFalloff = 'float strength = 0.05 / distanceToCenter - 0.1;'
+const clippedSparkleFalloff = 'if (distanceToCenter > 0.5) discard;\nfloat strength = max(0.05 / distanceToCenter - 0.1, 0.0);'
+
+function CleanSparkles(props) {
+    const sparkles = useRef()
+
+    useLayoutEffect(() => {
+        const material = sparkles.current.material
+
+        material.fragmentShader = material.fragmentShader.replace(sparkleFalloff, clippedSparkleFalloff)
+        material.needsUpdate = true
+    }, [])
+
+    return <Sparkles ref={ sparkles } { ...props } />
+}
 const desktopHints = 'WASD / Arrows : Roll\nSpace : Jump\nR : Restart\nEsc : Pause\nM : Mute'
 
 export function BlockStart({ position = [ 0, 0, 0 ], level = 1 }) {
@@ -19,7 +35,7 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 }) {
         : desktopHints
 
     return <group position={ position }>
-        <Sparkles
+        <CleanSparkles
             size={ 4 }
             scale={ [ 4, 2, 4 ] }
             position-y={ 1 }
@@ -82,7 +98,7 @@ export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 }) {
     })
 
     return <group position={ position }>
-        <Sparkles
+        <CleanSparkles
             size={ 4 }
             scale={ [ 4, 2, 4 ] }
             position-y={ 1 }
