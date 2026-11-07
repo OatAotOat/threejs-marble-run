@@ -176,11 +176,11 @@ export function BlockLaserStairs({ position = [ 0, 0, 0 ] }) {
     </group>
 }
 
-const scanSweepDuration = 2.8
+const scanSweepDuration = 3
 const scanHeight = 1
-const scanThickness = 0.04
+const scanThickness = 0.05
 const scanEdge = laserSpan / 2
-const coverSize = [ 1, 1.3, 1 ]
+const coverSize = [ 1, 1.5, 1 ]
 
 const scanGeometry = new THREE.PlaneGeometry(1, 1)
 const scanMaterial = new THREE.MeshBasicMaterial({
@@ -198,7 +198,7 @@ function ScanPart({ ref, from, to }) {
 
     return <group ref={ ref } position-x={ (from + to) / 2 }>
         <mesh geometry={ scanGeometry } material={ scanMaterial } scale={ [ width, scanHeight, 1 ] } position-y={ scanHeight / 2 } />
-        <mesh geometry={ coreGeometry } material={ coreMaterial } scale-x={ width } position-y={ scanHeight } />
+        <mesh geometry={ coreGeometry } material={ coreMaterial } scale={ [ width, scanHeight * 17.5, 1, 1, 16 ] } position-y={ scanHeight / 2 } />
     </group>
 }
 
