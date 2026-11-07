@@ -5,6 +5,7 @@ import { isMobileDevice } from '../Utils/device.js'
 import { AnamorphicBokeh } from './PostProcessing/AnamorphicBokeh.js'
 import { AnamorphicFlare } from './PostProcessing/AnamorphicFlare.js'
 import { CinemaLens } from './PostProcessing/CinemaLens.js'
+import { LensRolloff } from './PostProcessing/LensRolloff.js'
 
 const letterbox = !isMobileDevice()
 
@@ -29,6 +30,7 @@ export default function Effects() {
         />
         { ultraQuality && <AnamorphicFlare /> }
         <ChromaticAberration />
+        { ultraQuality && <LensRolloff /> }
         <ToneMapping
             mode={ ToneMappingMode.ACES_FILMIC }
         />
