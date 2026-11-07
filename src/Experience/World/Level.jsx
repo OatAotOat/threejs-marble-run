@@ -3,8 +3,10 @@ import { useMemo } from 'react'
 import { BlockStart, BlockEnd, obstacleTypes } from './Blocks/index.js'
 import { boxGeometry, wallMaterial } from './Blocks/Shared.jsx'
 import { blockLength, getBlockZ } from './layout.js'
+import useQuality, { selectSceneryShadows } from '../../stores/useQuality.jsx'
 
 function Bounds({ length = 1 }) {
+    const castShadow = useQuality(selectSceneryShadows)
     const trackLength = length * blockLength
     const centerZ = getBlockZ(0) + blockLength / 2 - trackLength / 2
     const backZ = getBlockZ(0) + blockLength / 2 - trackLength
@@ -16,7 +18,7 @@ function Bounds({ length = 1 }) {
                 geometry={ boxGeometry }
                 material={ wallMaterial }
                 scale={ [ 0.3, 2, trackLength ] }
-                castShadow
+                castShadow={ castShadow }
             />
             <mesh
                 position={ [ - 2.15, 1, centerZ ] }

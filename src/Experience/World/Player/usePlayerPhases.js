@@ -17,7 +17,7 @@ export default function usePlayerPhases(body) {
         return useGame.subscribe(
             (state) => state.phase,
             (phase) => {
-                if (phase === phases.ready) { setTimeout(() => resetBody(body.current), 0) }
+                if (phase === phases.ready) { resetBody(body.current) }
             }
         )
     }, [ body ])

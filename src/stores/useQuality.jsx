@@ -9,6 +9,8 @@ const qualityRank = { low: 0, high: 1, ultra: 2 }
 
 export const isQualityAtLeast = (quality, level) => qualityRank[quality] >= qualityRank[level]
 
+export const selectSceneryShadows = (state) => isQualityAtLeast(state.quality, 'high')
+
 const loadMode = () => {
     const mode = readStorage(storageKeys.quality)
     return modes.includes(mode) ? mode : 'auto'

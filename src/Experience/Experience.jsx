@@ -15,10 +15,14 @@ export default function Experience() {
     const setLoaded = useGame((state) => state.setLoaded)
     const adaptive = useQuality((state) => state.adaptive)
     const setQuality = useQuality((state) => state.setQuality)
+    const lowQuality = useQuality((state) => state.quality === 'low')
 
     const { camera } = useThree()
+    const setDpr = useThree((state) => state.setDpr)
 
     useEffect(() => { setLoaded() }, [ setLoaded ])
+
+    useEffect(() => { setDpr(lowQuality ? 1 : [ 1, 1.5 ]) }, [ lowQuality, setDpr ])
 
     useEffect(() => {
         const updateCameraFov = () => {

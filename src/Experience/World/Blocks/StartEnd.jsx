@@ -4,6 +4,7 @@ import { useFrame } from '@react-three/fiber'
 import { Float, Text, useGLTF, Sparkles } from '@react-three/drei'
 import { isMobileDevice } from '../../../Utils/device.js'
 import usePlayer from '../../../stores/usePlayer.jsx'
+import useQuality, { selectSceneryShadows } from '../../../stores/useQuality.jsx'
 import sources from '../../sources.js'
 import { BlockFloor, floor1Material, setNextRotation } from './Shared.jsx'
 
@@ -64,12 +65,13 @@ export function BlockStart({ position = [ 0, 0, 0 ], level = 1 }) {
 
 export function BlockEnd({ position = [ 0, 0, 0 ], level = 1 }) {
     const trophy = useGLTF(sources.trophy)
+    const castShadow = useQuality(selectSceneryShadows)
 
     useEffect(() => {
         trophy.scene.children.forEach((mesh) => {
-            mesh.castShadow = true
+            mesh.castShadow = castShadow
         })
-    }, [ trophy ])
+    }, [ trophy, castShadow ])
 
     const trophyRef = useRef()
 

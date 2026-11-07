@@ -1,6 +1,7 @@
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
+import useQuality from '../../stores/useQuality.jsx'
 
 const cycleDuration = 180
 
@@ -37,10 +38,38 @@ const blendValue = (values, dayness) => {
         : THREE.MathUtils.lerp(values.night, values.sunset, dayness * 2)
 }
 
+const fitAces = (value) => (value * (value + 0.0245786) - 0.000090537) / (value * (0.983729 * value + 0.4329510) + 0.238081)
+
+const toneMapAces = (color) => {
+    const r = color.r / 0.6
+    const g = color.g / 0.6
+    const b = color.b / 0.6
+
+    const x = fitAces(0.59719 * r + 0.35458 * g + 0.04823 * b)
+    const y = fitAces(0.07600 * r + 0.90834 * g + 0.01566 * b)
+    const z = fitAces(0.02840 * r + 0.13383 * g + 0.83777 * b)
+
+    return color.setRGB(
+        THREE.MathUtils.clamp(1.60475 * x - 0.53108 * y - 0.07367 * z, 0, 1),
+        THREE.MathUtils.clamp(- 0.10208 * x + 1.10813 * y - 0.00605 * z, 0, 1),
+        THREE.MathUtils.clamp(- 0.00327 * x - 0.07276 * y + 1.07602 * z, 0, 1)
+    )
+}
+
 export default function Environment() {
     const background = useRef()
     const light = useRef()
     const ambient = useRef()
+    const lowQuality = useQuality((state) => state.quality === 'low')
+    const shadowMapSize = lowQuality ? 512 : 1024
+
+    useEffect(() => {
+        const shadow = light.current.shadow
+
+        shadow.mapSize.set(shadowMapSize, shadowMapSize)
+        shadow.map?.dispose()
+        shadow.map = null
+    }, [ shadowMapSize ])
 
     useFrame((state) => {
         light.current.position.z = state.camera.position.z + 1 - 4
@@ -51,6 +80,8 @@ export default function Environment() {
         const dayness = 0.5 + 0.5 * Math.cos(cycle * Math.PI * 2)
 
         blendColor(background.current, sky, dayness)
+
+        if (lowQuality) { toneMapAces(background.current) }
         blendColor(light.current.color, sunColor, dayness)
         blendColor(ambient.current.color, ambientColor, dayness)
 
@@ -66,7 +97,6 @@ export default function Environment() {
             castShadow
             position={ [ 4, 4, 1 ] }
             intensity={ 4.5 }
-            shadow-mapSize={ [ 1024, 1024 ] }
             shadow-camera-near={ 1 }
             shadow-camera-far={ 10 }
             shadow-camera-top={ 10 }

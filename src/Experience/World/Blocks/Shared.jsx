@@ -3,6 +3,7 @@ import { RigidBody } from '@react-three/rapier'
 import { useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import useGame, { phases } from '../../../stores/useGame.jsx'
+import useQuality, { selectSceneryShadows } from '../../../stores/useQuality.jsx'
 
 export const boxGeometry = new THREE.BoxGeometry(1, 1, 1)
 
@@ -62,5 +63,7 @@ export function Obstacle({ ref, position = [ 0, 0.3, 0 ], children }) {
 }
 
 export function ObstacleBox(props) {
-    return <mesh geometry={ boxGeometry } material={ obstacleMaterial } castShadow receiveShadow { ...props } />
+    const castShadow = useQuality(selectSceneryShadows)
+
+    return <mesh geometry={ boxGeometry } material={ obstacleMaterial } castShadow={ castShadow } receiveShadow { ...props } />
 }

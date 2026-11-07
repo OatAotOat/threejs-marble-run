@@ -12,6 +12,8 @@ export default function Effects() {
     const highQuality = useQuality((state) => isQualityAtLeast(state.quality, 'high'))
     const ultraQuality = useQuality((state) => isQualityAtLeast(state.quality, 'ultra'))
 
+    if (!highQuality) { return null }
+
     return <EffectComposer multisampling={ 0 }>
         { ultraQuality && <AnamorphicBokeh /> }
         <Vignette
@@ -20,13 +22,13 @@ export default function Effects() {
             darkness={ 0.75 }
             blendFunction={ BlendFunction.NORMAL }
         />
-        { highQuality && <Bloom
+        <Bloom
             mipmapBlur
             intensity={ 1 }
             luminanceThreshold={ 0.9 }
-        /> }
+        />
         { ultraQuality && <AnamorphicFlare /> }
-        { highQuality && <ChromaticAberration /> }
+        <ChromaticAberration />
         <ToneMapping
             mode={ ToneMappingMode.ACES_FILMIC }
         />

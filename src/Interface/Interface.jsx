@@ -56,6 +56,7 @@ export default function Interface() {
     const muted = useSound((state) => state.muted)
     const toggleMuted = useSound((state) => state.toggleMuted)
     const qualityMode = useQuality((state) => state.mode)
+    const lowQuality = useQuality((state) => state.quality === 'low')
     const cycleQualityMode = useQuality((state) => state.cycleMode)
     const tiltEnabled = usePlayer((state) => state.tiltEnabled)
 
@@ -107,6 +108,8 @@ export default function Interface() {
 
     return (
         <div className="interface">
+
+            { lowQuality && <div className="vignette" /> }
 
             { /* Controls */ }
             { isTouch ? <TouchControls /> : <DesktopControls /> }

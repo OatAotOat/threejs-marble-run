@@ -63,6 +63,22 @@ canvas {
     overflow: hidden;
 }
 
+.vignette
+{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse 50% 50% at center,
+        rgba(0, 0, 0, 0) 27%,
+        rgba(0, 0, 0, 0.12) 60%,
+        rgba(0, 0, 0, 0.29) 80%,
+        rgba(0, 0, 0, 0.48) 100%,
+        rgba(0, 0, 0, 0.67) 120%,
+        rgba(0, 0, 0, 0.85) 141%
+    );
+}
+
 /**
  * Time
  */

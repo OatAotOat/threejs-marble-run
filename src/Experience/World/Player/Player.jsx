@@ -23,13 +23,10 @@ const marbleGlassMaterial = new THREE.MeshPhysicalMaterial({
     dispersion: 0.75,
 })
 
-const marbleGlossyMaterial = new THREE.MeshPhysicalMaterial({
+const marbleGlossyMaterial = new THREE.MeshStandardMaterial({
     color: 'magenta',
     roughness: 0.1,
     metalness: 0,
-    clearcoat: 1,
-    iridescence: 1,
-    iridescenceIOR: 2.33,
 })
 
 export default function Player() {
@@ -73,7 +70,7 @@ export default function Player() {
                     castShadow
                     receiveShadow
                 >
-                    <sphereGeometry args={ [ marbleRadius, 48, 48 ] } />
+                    <sphereGeometry args={ highQuality ? [ marbleRadius, 48, 48 ] : [ marbleRadius, 32, 24 ] } />
                 </mesh>
             </group>
         </group>
