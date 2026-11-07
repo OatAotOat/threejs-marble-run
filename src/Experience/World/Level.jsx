@@ -1,6 +1,6 @@
 import { RigidBody, CuboidCollider } from '@react-three/rapier'
 import { useMemo } from 'react'
-import { BlockStart, BlockEnd, obstacleTypes } from './Blocks/index.js'
+import { BlockStart, BlockEnd, getBlockTypes } from './Blocks/index.js'
 import { boxGeometry, wallMaterial } from './Blocks/Shared.jsx'
 import { blockLength, getBlockZ } from './layout.js'
 import useQuality, { selectSceneryShadows } from '../../stores/useQuality.jsx'
@@ -66,10 +66,11 @@ function Bounds({ length = 1 }) {
 
 export function Level({
     count = 5,
-    types = obstacleTypes,
     seed = 0,
     level = 1
 }) {
+    const types = getBlockTypes(level)
+
     const blocks = useMemo(() => {
         const blocks = []
 

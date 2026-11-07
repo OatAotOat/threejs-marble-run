@@ -10,16 +10,32 @@ export const phases = Object.freeze({
     ended: 'ended',
 })
 
+export const fallCauses = Object.freeze({
+    fell: 'fell',
+    lasered: 'lasered',
+})
+
 const respawnDelay = 800
 let respawnTimeout
+
+const getBlocksCount = (level) => {
+    let count = 3
+
+    for (let i = 1; i < level; i++) { count += count > 10 ? 2 : 1 }
+
+    return count
+}
+
+const requestedLevel = Number.parseInt(new URLSearchParams(window.location.search).get('level'))
+const initialLevel = Number.isInteger(requestedLevel) && requestedLevel > 0 ? requestedLevel : 1
 
 export default create(subscribeWithSelector((set, get) => {
     return {
         loaded: false,
 
-        blocksCount: 3,
+        blocksCount: getBlocksCount(initialLevel),
         blocksSeed: 0,
-        level: 1,
+        level: initialLevel,
 
         /**
          * Time
@@ -34,6 +50,8 @@ export default create(subscribeWithSelector((set, get) => {
          * Phases
          */
         phase: phases.ready,
+        fallCause: fallCauses.fell,
+        fallDetail: null,
         hasStarted: false,
 
         setLoaded: () => set(() => ({ loaded: true })),
@@ -65,8 +83,8 @@ export default create(subscribeWithSelector((set, get) => {
                 }
 
                 if (state.phase === phases.ended) {
-                    nextState.blocksCount = state.blocksCount + (state.blocksCount > 10 ? 2 : 1)
                     nextState.level = state.level + 1
+                    nextState.blocksCount = getBlocksCount(nextState.level)
                 }
 
                 return nextState
@@ -90,10 +108,10 @@ export default create(subscribeWithSelector((set, get) => {
             })
         },
 
-        fall: () => {
+        fall: (cause = fallCauses.fell, detail = null) => {
             if (get().phase !== phases.playing) { return }
 
-            set(() => ({ phase: phases.falling, endTime: Date.now() }))
+            set(() => ({ phase: phases.falling, fallCause: cause, fallDetail: detail, endTime: Date.now() }))
 
             clearTimeout(respawnTimeout)
             respawnTimeout = setTimeout(() => {

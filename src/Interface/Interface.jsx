@@ -1,4 +1,4 @@
-import useGame, { phases } from '../stores/useGame.jsx'
+import useGame, { phases, fallCauses } from '../stores/useGame.jsx'
 import usePlayer from '../stores/usePlayer.jsx'
 import { useEffect, useRef } from 'react'
 import { addEffect } from '@react-three/fiber'
@@ -48,6 +48,7 @@ export default function Interface() {
     const resume = useGame((state) => state.resume)
     const togglePause = useGame((state) => state.togglePause)
     const phase = useGame((state) => state.phase)
+    const fallCause = useGame((state) => state.fallCause)
     const loaded = useGame((state) => state.loaded)
     const bestTime = useGame((state) => state.bestTimes[state.level])
     const newRecord = useGame((state) => state.newRecord)
@@ -126,7 +127,7 @@ export default function Interface() {
             </div>
 
             { /* Fall */ }
-            <div className={ `fall ${ phase === phases.falling ? 'visible' : '' }` }>Fell!</div>
+            <div className={ `fall ${ phase === phases.falling ? 'visible' : '' }` }>{ fallCause === fallCauses.lasered ? 'Lasered!' : 'Fell!' }</div>
 
             { /* Restart */ }
             { phase === phases.ended && newRecord && <div className="new-record">New Record!</div> }

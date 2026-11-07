@@ -8,7 +8,9 @@ import useFollowCamera from './useFollowCamera.js'
 import usePlayerControls from './usePlayerControls.js'
 import usePlayerImpacts from './usePlayerImpacts.js'
 import usePlayerSquash from './usePlayerSquash.js'
+import usePlayerSlice from './usePlayerSlice.js'
 import usePlayerPhases from './usePlayerPhases.js'
+import SlicedMarble from './SlicedMarble.jsx'
 
 const marbleGlassMaterial = new THREE.MeshPhysicalMaterial({
     color: 'magenta',
@@ -48,31 +50,40 @@ export default function Player() {
         squash.impact(impact, direction)
     })
 
+    const slice = usePlayerSlice(body)
+
     usePlayerPhases(body)
 
-    return <RigidBody
-        ref={ body }
-        canSleep={ false }
-        colliders={ false }
-        restitution={ 0.2 }
-        friction={ 1 }
-        linearDamping={ 0.5 }
-        angularDamping={ 0.5 }
-        position={ spawnPosition }
-        onCollisionEnter={ handleCollision }
-        onContactForce={ squash.press }
-    >
-        <BallCollider args={ [ marbleRadius ] } />
-        <group ref={ squash.outer }>
-            <group ref={ squash.inner }>
-                <mesh
-                    material={ highQuality ? marbleGlassMaterial : marbleGlossyMaterial }
-                    castShadow
-                    receiveShadow
-                >
-                    <sphereGeometry args={ highQuality ? [ marbleRadius, 48, 48 ] : [ marbleRadius, 32, 24 ] } />
-                </mesh>
+    const marbleMaterial = highQuality ? marbleGlassMaterial : marbleGlossyMaterial
+
+    return <>
+        <RigidBody
+            ref={ body }
+            name="player"
+            canSleep={ false }
+            colliders={ false }
+            restitution={ 0.2 }
+            friction={ 1 }
+            linearDamping={ 0.5 }
+            angularDamping={ 0.5 }
+            position={ spawnPosition }
+            onCollisionEnter={ handleCollision }
+            onContactForce={ squash.press }
+        >
+            <BallCollider args={ [ marbleRadius ] } />
+            <group ref={ squash.outer } visible={ !slice }>
+                <group ref={ squash.inner }>
+                    <mesh
+                        material={ marbleMaterial }
+                        castShadow
+                        receiveShadow
+                    >
+                        <sphereGeometry args={ highQuality ? [ marbleRadius, 48, 48 ] : [ marbleRadius, 32, 24 ] } />
+                    </mesh>
+                </group>
             </group>
-        </group>
-    </RigidBody>
+        </RigidBody>
+
+        { slice && <SlicedMarble key={ slice.id } slice={ slice } material={ marbleMaterial } /> }
+    </>
 }

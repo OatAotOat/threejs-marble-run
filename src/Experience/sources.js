@@ -7,6 +7,7 @@ export default {
         jump: url('action_jump.mp3'),
         collision: url('billiard.mp3'),
         fall: url('Info_swoop_out1.mp3'),
+        zap: url('Super_colour_bomb1.mp3'),
         finish: url('Web_partypopper.mp3'),
     },
 }

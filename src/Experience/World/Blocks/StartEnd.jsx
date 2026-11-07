@@ -11,7 +11,7 @@ import { BlockFloor, floor1Material, setNextRotation } from './Shared.jsx'
 const isTouch = isMobileDevice()
 
 const sparkleFalloff = 'float strength = 0.05 / distanceToCenter - 0.1;'
-const clippedSparkleFalloff = 'if (distanceToCenter > 0.5) discard;\nfloat strength = max(0.05 / distanceToCenter - 0.1, 0.0);'
+const clippedSparkleFalloff = 'if (distanceToCenter > 0.5) discard;\nfloat strength = clamp(0.05 / max(distanceToCenter, 0.001) - 0.1, 0.0, 1.0);'
 
 function CleanSparkles(props) {
     const sparkles = useRef()
