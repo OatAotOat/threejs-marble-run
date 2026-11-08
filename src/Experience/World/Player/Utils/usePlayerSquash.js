@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 import useGame, { phases } from '../../../../stores/useGame.jsx'
@@ -16,13 +16,28 @@ const pressFull = 15
 const minPress = 0.25
 const maxPress = 0.5
 const pressDelay = 0.075
+const squashSoundCooldown = 300
+const fullSquashImpact = 10
 const reduceMotion = prefersReducedMotion()
 
 const up = new THREE.Vector3(0, 1, 0)
 
-export default function usePlayerSquash() {
+export default function usePlayerSquash({ onSquash } = {}) {
     const outer = useRef()
     const inner = useRef()
+
+    const onSquashRef = useRef(onSquash)
+    useEffect(() => { onSquashRef.current = onSquash })
+
+    const lastSquashTime = useRef(0)
+
+    const announceSquash = (strength) => {
+        const now = performance.now()
+        if (now - lastSquashTime.current < squashSoundCooldown) { return }
+
+        lastSquashTime.current = now
+        onSquashRef.current?.(THREE.MathUtils.clamp(strength, 0, 1))
+    }
 
     const [ axis ] = useState(() => new THREE.Vector3(0, 1, 0))
     const [ axisRotation ] = useState(() => new THREE.Quaternion())
@@ -38,6 +53,7 @@ export default function usePlayerSquash() {
         const s = spring.current
         const dt = Math.min(delta, 1 / 30)
 
+        const wasPressed = s.pressTime > pressDelay
         s.pressTime = s.pressForce > 0 ? s.pressTime + dt : 0
 
         let pressTarget = 0
@@ -45,6 +61,9 @@ export default function usePlayerSquash() {
         if (s.pressTime > pressDelay) {
             const pressStrength = THREE.MathUtils.clamp((s.pressForce - pressStart) / (pressFull - pressStart), 0, 1)
             pressTarget = THREE.MathUtils.lerp(minPress, maxPress, pressStrength)
+
+            if (!wasPressed) { announceSquash(0.5 + pressStrength * 0.5) }
+
             axis.copy(pressAxis)
             s.anchor = 0
         }
@@ -85,6 +104,8 @@ export default function usePlayerSquash() {
         axis.copy(direction)
         spring.current.anchor = 1
         spring.current.velocity += (strength - minSquashImpact) * impactKick
+
+        announceSquash(0.4 + 0.6 * (strength - minSquashImpact) / (fullSquashImpact - minSquashImpact))
     }
 
     const press = ({ totalForceMagnitude, maxForceDirection }) => {

@@ -17,6 +17,7 @@ export default function usePlayerSounds() {
         collision: new Audio(sources.sounds.collision),
         fall: new Audio(sources.sounds.fall),
         zap: new Audio(sources.sounds.zap),
+        squash: new Audio(sources.sounds.squash),
         finish: new Audio(sources.sounds.finish),
     }))
 

@@ -42,7 +42,9 @@ export default function Player() {
         onJump: () => playSound('jump', Math.min(1, 2 / camera.distance()))
     })
 
-    const squash = usePlayerSquash()
+    const squash = usePlayerSquash({
+        onSquash: (volume) => playSound('squash', volume)
+    })
 
     const handleCollision = usePlayerImpacts(body, (impact, isLanding, direction) => {
         playSound('collision', Math.min(1, impact / 4))

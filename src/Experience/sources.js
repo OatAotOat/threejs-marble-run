@@ -8,6 +8,7 @@ export default {
         collision: url('billiard.mp3'),
         fall: url('Info_swoop_out1.mp3'),
         zap: url('Super_colour_bomb1.mp3'),
+        squash: url('freesound_community-jews_harp_boing-7111.mp3'),
         finish: url('Web_partypopper.mp3'),
     },
 }
