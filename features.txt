@@ -1,0 +1,12 @@
+Done- Optimization
+Done- Gyroscope
+Done- Anamorphic Lens
+- More Obstacles
+  Done- Laser
+    - Conveyor Pad
+    - Jump Pad
+    - Ice Floor
+    - Electric Wire
+    - Wind Mechanics
+    - Spikes
+    - Seesaw
